@@ -1,0 +1,63 @@
+{% extends "dashboard.html" %}
+
+{% block title %}{% if module %}Edit Module{% else %}Add Module{% endif %} - KarmixTech LMS{% endblock %}
+
+{% block page_content %}
+<div class="page-header">
+    <div style="display: flex; align-items: center; gap: 1rem;">
+        <a href="{{ url_for('admin_content.manage_modules', course_id=course.id) }}" class="btn btn-outline">
+            <i class="fas fa-arrow-left"></i>
+        </a>
+        <div>
+            <h1 class="page-title">{% if module %}Edit Module{% else %}Add Module{% endif %}</h1>
+            <p class="page-subtitle">{{ course.title }}</p>
+        </div>
+    </div>
+</div>
+
+<div style="max-width: 700px;">
+    <div class="card">
+        <form method="POST">
+            <div class="card-body">
+                <div class="form-group">
+                    <label class="form-label">Module Title *</label>
+                    <input type="text" name="title" class="form-control" required
+                           value="{{ module.title if module else '' }}"
+                           placeholder="e.g., Introduction to Python">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Description</label>
+                    <textarea name="description" class="form-control" rows="3"
+                              placeholder="Brief description of this module's content...">{{ module.description if module else '' }}</textarea>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Order</label>
+                    <input type="number" name="order" class="form-control" type="number" min="1" step="1"
+                           value="{{ module.order if module else '' }}"
+                           placeholder="Auto-assigned if left empty">
+                    <div class="form-text">Modules are displayed in order. Lower numbers appear first.</div>
+                </div>
+
+                <div class="form-group">
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input" id="is_preview" name="is_preview"
+                               {% if not module or module.is_preview %}checked{% endif %}>
+                        <label class="form-check-label" for="is_preview">
+                            <strong>Allow Preview</strong> - Students can view this module's preview lessons without enrolling
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-footer" style="display: flex; justify-content: space-between;">
+                <a href="{{ url_for('admin_content.manage_modules', course_id=course.id) }}" class="btn btn-outline">Cancel</a>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save"></i> {% if module %}Update Module{% else %}Create Module{% endif %}
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,89 @@
+{% extends "dashboard.html" %}
+
+{% block title %}Admin Settings - KarmixTech LMS{% endblock %}
+
+{% block page_content %}
+<div class="page-header">
+    <h1 class="page-title">Admin Settings</h1>
+    <p class="page-subtitle">Manage your administrator account preferences.</p>
+</div>
+
+<div style="display: grid; grid-template-columns: 300px 1fr; gap: 2rem;">
+    <!-- Admin Info -->
+    <div>
+        <div class="card">
+            <div class="card-body" style="text-align: center; padding: 2rem;">
+                <div class="user-avatar" style="width: 80px; height: 80px; font-size: 1.5rem; margin: 0 auto 1rem; background: linear-gradient(135deg, var(--gray-700), var(--gray-900));">
+                    {{ current_user.first_name[0] }}{{ current_user.last_name[0] }}
+                </div>
+                <h3 style="margin-bottom: 0.25rem;">{{ current_user.full_name }}</h3>
+                <p style="color: var(--gray-500); margin-bottom: 1rem;">{{ current_user.email }}</p>
+                <span class="badge badge-primary">Administrator</span>
+
+                <div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--gray-200);">
+                    <p style="font-size: 0.75rem; color: var(--gray-400); margin: 0;">
+                        Last login: {{ current_user.last_login|date_format if current_user.last_login else 'N/A' }}
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Form -->
+    <div>
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title"><i class="fas fa-user-edit" style="margin-right: 0.5rem;"></i> Profile Information</h3>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('admin.settings') }}">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div class="form-group">
+                            <label class="form-label">First Name</label>
+                            <input type="text" name="first_name" class="form-control" value="{{ current_user.first_name }}" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Last Name</label>
+                            <input type="text" name="last_name" class="form-control" value="{{ current_user.last_name }}" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Email Address</label>
+                        <input type="email" class="form-control" value="{{ current_user.email }}" disabled>
+                        <div class="form-text">Email changes require support assistance.</div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Save Changes
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <div class="card mt-3">
+            <div class="card-header">
+                <h3 class="card-title"><i class="fas fa-database" style="margin-right: 0.5rem;"></i> System Information</h3>
+            </div>
+            <div class="card-body">
+                <div style="display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid var(--gray-100);">
+                    <span style="color: var(--gray-500);">Database</span>
+                    <span>PostgreSQL</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid var(--gray-100);">
+                    <span style="color: var(--gray-500);">Python Version</span>
+                    <span>3.11+</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid var(--gray-100);">
+                    <span style="color: var(--gray-500);">Flask Version</span>
+                    <span>3.0.0</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; padding: 0.5rem 0;">
+                    <span style="color: var(--gray-500);">Environment</span>
+                    <span class="badge badge-success">Production</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

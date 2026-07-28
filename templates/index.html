@@ -1,0 +1,221 @@
+{% extends "base.html" %}
+
+{% block body_class %}landing-layout{% endblock %}
+
+{% block content %}
+<!-- Header -->
+<header class="landing-header">
+    <div class="container">
+        <div class="sidebar-logo">
+            <div class="sidebar-logo-icon">
+                <i class="fas fa-graduation-cap"></i>
+            </div>
+            <span style="color: var(--gray-900);">KarmixTech</span>
+        </div>
+
+        <nav style="display: flex; align-items: center; gap: 2rem;">
+            <a href="{{ url_for('about') }}" style="color: var(--gray-600);">About</a>
+            <a href="{{ url_for('student.browse_courses') }}" style="color: var(--gray-600);">Courses</a>
+            <a href="{{ url_for('contact') }}" style="color: var(--gray-600);">Contact</a>
+            <a href="{{ url_for('auth.login') }}" class="btn btn-outline">Login</a>
+            <a href="{{ url_for('auth.register') }}" class="btn btn-primary">Get Started</a>
+        </nav>
+    </div>
+</header>
+
+<!-- Hero Section -->
+<section class="hero">
+    <div class="container">
+        <div class="hero-content">
+            <h1 class="hero-title">Transform Your Learning Journey with KarmixTech LMS</h1>
+            <p class="hero-subtitle">Access world-class courses, learn from expert instructors, and build skills that matter. Join thousands of learners advancing their careers.</p>
+            <div class="hero-actions">
+                <a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-lg">
+                    <i class="fas fa-rocket"></i>
+                    Start Learning Free
+                </a>
+                <a href="{{ url_for('student.browse_courses') }}" class="btn btn-outline btn-lg" style="border-color: rgba(255,255,255,0.3); color: var(--white);">
+                    <i class="fas fa-play-circle"></i>
+                    Browse Courses
+                </a>
+            </div>
+
+            <div class="hero-stats">
+                <div class="hero-stat">
+                    <div class="hero-stat-value">10,000+</div>
+                    <div class="hero-stat-label">Active Students</div>
+                </div>
+                <div class="hero-stat">
+                    <div class="hero-stat-value">500+</div>
+                    <div class="hero-stat-label">Expert-Led Courses</div>
+                </div>
+                <div class="hero-stat">
+                    <div class="hero-stat-value">95%</div>
+                    <div class="hero-stat-label">Satisfaction Rate</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section style="padding: 5rem 0;">
+    <div class="container">
+        <div style="text-align: center; margin-bottom: 3rem;">
+            <h2 style="font-size: 2rem; margin-bottom: 1rem;">Why Choose KarmixTech LMS?</h2>
+            <p style="color: var(--gray-500); max-width: 600px; margin: 0 auto;">We provide the best learning experience with cutting-edge features designed for modern learners.</p>
+        </div>
+
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-laptop-code"></i>
+                </div>
+                <h3 class="feature-title">Learn Anywhere</h3>
+                <p class="feature-description">Access your courses from any device, anytime. Our platform is fully responsive and optimized for mobile learning.</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-certificate"></i>
+                </div>
+                <h3 class="feature-title">Get Certified</h3>
+                <p class="feature-description">Earn certificates upon course completion. Showcase your achievements to employers and peers.</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <h3 class="feature-title">Track Progress</h3>
+                <p class="feature-description">Monitor your learning journey with detailed progress tracking and performance analytics.</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+                <h3 class="feature-title">Expert Instructors</h3>
+                <p class="feature-description">Learn from industry professionals and subject matter experts with real-world experience.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Courses Preview -->
+<section style="padding: 4rem 0; background: var(--gray-50);">
+    <div class="container">
+        <div style="text-align: center; margin-bottom: 2rem;">
+            <h2 style="font-size: 1.75rem; margin-bottom: 0.5rem;">Popular Courses</h2>
+            <p style="color: var(--gray-500);">Start your learning journey with our most popular courses</p>
+        </div>
+
+        {% if featured_courses and featured_courses|length > 0 %}
+        <div class="courses-grid">
+            {% for course in featured_courses[:3] %}
+            <div class="course-card">
+                <div class="course-thumbnail">
+                    <img src="{{ course.thumbnail }}" alt="{{ course.title }}">
+                    <span class="course-badge level">{{ course.level }}</span>
+                    {% if course.is_free %}
+                    <span class="course-badge free">Free</span>
+                    {% endif %}
+                </div>
+                <div class="course-content">
+                    <div class="course-category">{{ course.category }}</div>
+                    <h3 class="course-title">
+                        <a href="{{ url_for('student.course_detail', course_id=course.id) }}">{{ course.title }}</a>
+                    </h3>
+                    <div class="course-meta">
+                        <span><i class="fas fa-clock"></i> {{ course.duration_hours }} hours</span>
+                        <span><i class="fas fa-user-graduate"></i> {{ course.enrolled_students_count }}</span>
+                    </div>
+                    <div class="course-footer">
+                        <div class="course-instructor">
+                            <div class="instructor-avatar">
+                                {{ course.instructor[0] if course.instructor else 'N' }}
+                            </div>
+                            <span class="instructor-name">{{ course.instructor or 'Expert Instructor' }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div style="text-align: center; margin-top: 2rem;">
+            <a href="{{ url_for('student.browse_courses') }}" class="btn btn-primary btn-lg">
+                Explore All Courses <i class="fas fa-arrow-right"></i>
+            </a>
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <div class="empty-state-icon">
+                <i class="fas fa-book-open"></i>
+            </div>
+            <h3>No Courses Available</h3>
+            <p>Check back soon for new courses!</p>
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section style="padding: 5rem 0; background: linear-gradient(135deg, var(--primary-color), var(--accent-color)); color: var(--white);">
+    <div class="container" style="text-align: center;">
+        <h2 style="font-size: 2rem; margin-bottom: 1rem; color: var(--white);">Ready to Start Your Learning Journey?</h2>
+        <p style="opacity: 0.9; margin-bottom: 2rem; max-width: 500px; margin-left: auto; margin-right: auto;">Join thousands of learners who are advancing their careers with KarmixTech LMS.</p>
+        <a href="{{ url_for('auth.register') }}" class="btn" style="background: var(--white); color: var(--primary-color);">
+            Create Free Account <i class="fas fa-arrow-right"></i>
+        </a>
+    </div>
+</section>
+
+<!-- Footer -->
+<footer class="landing-footer">
+    <div class="container">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 3rem; margin-bottom: 2rem;">
+            <div>
+                <div class="sidebar-logo" style="margin-bottom: 1rem;">
+                    <div class="sidebar-logo-icon">
+                        <i class="fas fa-graduation-cap"></i>
+                    </div>
+                    <span style="color: var(--white);">KarmixTech</span>
+                </div>
+                <p style="color: var(--gray-400); font-size: 0.875rem;">A professional Learning Management System designed to transform how you learn and grow.</p>
+            </div>
+
+            <div>
+                <h4 style="color: var(--white); margin-bottom: 1rem; font-size: 1rem;">Quick Links</h4>
+                <ul style="list-style: none; padding: 0; margin: 0;">
+                    <li style="margin-bottom: 0.5rem;"><a href="{{ url_for('student.browse_courses') }}" style="color: var(--gray-400);">Browse Courses</a></li>
+                    <li style="margin-bottom: 0.5rem;"><a href="{{ url_for('about') }}" style="color: var(--gray-400);">About Us</a></li>
+                    <li style="margin-bottom: 0.5rem;"><a href="{{ url_for('contact') }}" style="color: var(--gray-400);">Contact</a></li>
+                </ul>
+            </div>
+
+            <div>
+                <h4 style="color: var(--white); margin-bottom: 1rem; font-size: 1rem;">For Students</h4>
+                <ul style="list-style: none; padding: 0; margin: 0;">
+                    <li style="margin-bottom: 0.5rem;"><a href="{{ url_for('auth.register') }}" style="color: var(--gray-400);">Register</a></li>
+                    <li style="margin-bottom: 0.5rem;"><a href="{{ url_for('auth.login') }}" style="color: var(--gray-400);">Login</a></li>
+                </ul>
+            </div>
+
+            <div>
+                <h4 style="color: var(--white); margin-bottom: 1rem; font-size: 1rem;">Connect</h4>
+                <div style="display: flex; gap: 1rem;">
+                    <a href="#" style="color: var(--gray-400); font-size: 1.25rem;"><i class="fab fa-facebook"></i></a>
+                    <a href="#" style="color: var(--gray-400); font-size: 1.25rem;"><i class="fab fa-twitter"></i></a>
+                    <a href="#" style="color: var(--gray-400); font-size: 1.25rem;"><i class="fab fa-linkedin"></i></a>
+                    <a href="#" style="color: var(--gray-400); font-size: 1.25rem;"><i class="fab fa-github"></i></a>
+                </div>
+            </div>
+        </div>
+
+        <div style="border-top: 1px solid var(--gray-700); padding-top: 1.5rem; text-align: center; color: var(--gray-500); font-size: 0.875rem;">
+            &copy; {{ current_year }} KarmixTech LMS. All rights reserved.
+        </div>
+    </div>
+</footer>
+{% endblock %}

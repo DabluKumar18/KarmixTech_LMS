@@ -1,0 +1,164 @@
+{% extends "dashboard.html" %}
+
+{% block title %}{% if course %}Edit Course{% else %}Add Course{% endif %} - KarmixTech LMS{% endblock %}
+
+{% block page_content %}
+<div class="page-header">
+    <div style="display: flex; align-items: center; gap: 1rem;">
+        <a href="{{ url_for('admin.manage_courses') }}" class="btn btn-outline">
+            <i class="fas fa-arrow-left"></i>
+        </a>
+        <div>
+            <h1 class="page-title">{% if course %}Edit Course{% else %}Add New Course{% endif %}</h1>
+            <p class="page-subtitle">{% if course %}Update course information{% else %}Create a new course for the platform{% endif %}</p>
+        </div>
+    </div>
+</div>
+
+<div style="display: grid; grid-template-columns: 2fr 1fr; gap: 2rem;">
+    <!-- Main Form -->
+    <div class="card">
+        <form method="POST" action="{% if course %}{{ url_for('admin.edit_course', course_id=course.id) }}{% else %}{{ url_for('admin.add_course') }}{% endif %}">
+            <div class="card-body">
+                <h3 style="margin-bottom: 1.5rem;">Course Information</h3>
+
+                <div class="form-group">
+                    <label class="form-label">Course Title *</label>
+                    <input type="text" name="title" class="form-control" required
+                           value="{{ course.title if course else '' }}"
+                           placeholder="e.g., Introduction to Python Programming">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Description *</label>
+                    <textarea name="description" class="form-control" rows="5" required placeholder="Describe what students will learn in this course...">{{ course.description if course else '' }}</textarea>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div class="form-group">
+                        <label class="form-label">Category *</label>
+                        <select name="category" class="form-control" required>
+                            <option value="">Select Category</option>
+                            {% for cat in categories %}
+                            <option value="{{ cat }}" {% if course and course.category == cat %}selected{% endif %}>{{ cat }}</option>
+                            {% endfor %}
+                            <option value="Programming" {% if course and course.category == 'Programming' %}selected{% endif %}>Programming</option>
+                            <option value="Web Development" {% if course and course.category == 'Web Development' %}selected{% endif %}>Web Development</option>
+                            <option value="Data Science" {% if course and course.category == 'Data Science' %}selected{% endif %}>Data Science</option>
+                            <option value="Database" {% if course and course.category == 'Database' %}selected{% endif %}>Database</option>
+                            <option value="Cloud Computing" {% if course and course.category == 'Cloud Computing' %}selected{% endif %}>Cloud Computing</option>
+                            <option value="Mobile Development" {% if course and course.category == 'Mobile Development' %}selected{% endif %}>Mobile Development</option>
+                            <option value="AI & Machine Learning" {% if course and course.category == 'AI & Machine Learning' %}selected{% endif %}>AI & Machine Learning</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Level *</label>
+                        <select name="level" class="form-control" required>
+                            {% for lvl in levels %}
+                            <option value="{{ lvl }}" {% if course and course.level == lvl %}selected{% endif %}>{{ lvl }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div class="form-group">
+                        <label class="form-label">Duration (hours) *</label>
+                        <input type="number" name="duration_hours" class="form-control" required min="0"
+                               value="{{ course.duration_hours if course else 0 }}">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Price ($)</label>
+                        <input type="number" name="price" class="form-control" min="0" step="0.01"
+                               value="{{ course.price if course else 0 }}">
+                        <div class="form-text">Enter 0 for free courses</div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Instructor Name</label>
+                    <input type="text" name="instructor" class="form-control"
+                           value="{{ course.instructor if course else '' }}"
+                           placeholder="e.g., Dr. John Smith">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Thumbnail URL</label>
+                    <input type="url" name="thumbnail" class="form-control"
+                           value="{{ course.thumbnail if course else '' }}"
+                           placeholder="https://example.com/image.jpg">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Requirements</label>
+                    <textarea name="requirements" class="form-control" rows="3"
+                              placeholder="What students need to know before taking this course...">{{ course.requirements if course else '' }}</textarea>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">What You'll Learn</label>
+                    <textarea name="what_you_learn" class="form-control" rows="4"
+                              placeholder="Key takeaways from this course...">{{ course.what_you_learn if course else '' }}</textarea>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="card-footer" style="display: flex; justify-content: space-between; align-items: center;">
+                <div class="form-check">
+                    <input type="checkbox" class="form-check-input" id="is_published" name="is_published"
+                           {% if not course or course.is_published %}checked{% endif %}>
+                    <label class="form-check-label" for="is_published">Publish course immediately</label>
+                </div>
+
+                <div style="display: flex; gap: 0.75rem;">
+                    <a href="{{ url_for('admin.manage_courses') }}" class="btn btn-outline">Cancel</a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> {% if course %}Update Course{% else %}Create Course{% endif %}
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Sidebar Tips -->
+    <div>
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title"><i class="fas fa-lightbulb" style="margin-right: 0.5rem; color: var(--warning-color);"></i> Tips</h3>
+            </div>
+            <div class="card-body" style="font-size: 0.85rem; color: var(--gray-600);">
+                <p><strong>Title:</strong> Keep it clear and descriptive. Include the main topic or skill.</p>
+                <p><strong>Description:</strong> Write compelling content explaining the course value and outcomes.</p>
+                <p><strong>Category:</strong> Choose the most relevant category for better discoverability.</p>
+                <p><strong>Thumbnail:</strong> Use high-quality images (500x300px recommended).</p>
+                <p><strong>Requirements:</strong> List prerequisites students should have.</p>
+            </div>
+        </div>
+
+        <div class="card mt-3">
+            <div class="card-header">
+                <h3 class="card-title"><i class="fas fa-image" style="margin-right: 0.5rem;"></i> Sample Thumbnails</h3>
+            </div>
+            <div class="card-body" style="font-size: 0.75rem;">
+                <p style="color: var(--gray-500); margin-bottom: 0.5rem;">Click to use:</p>
+                <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                    <button type="button" onclick="document.querySelector('input[name=thumbnail]').value='https://images.pexels.com/photos/1181671/pexels-photo-1181671.jpeg?auto=compress&cs=tinysrgb&w=500';" class="btn btn-outline btn-sm">
+                        Programming
+                    </button>
+                    <button type="button" onclick="document.querySelector('input[name=thumbnail]').value='https://images.pexels.com/photos/11035422/pexels-photo-11035422.jpeg?auto=compress&cs=tinysrgb&w=500';" class="btn btn-outline btn-sm">
+                        Web Development
+                    </button>
+                    <button type="button" onclick="document.querySelector('input[name=thumbnail]').value='https://images.pexels.com/photos/669615/pexels-photo-669615.jpeg?auto=compress&cs=tinysrgb&w=500';" class="btn btn-outline btn-sm">
+                        Data Science
+                    </button>
+                    <button type="button" onclick="document.querySelector('input[name=thumbnail]').value='https://images.pexels.com/photos/1148820/pexels-photo-1148820.jpeg?auto=compress&cs=tinysrgb&w=500';" class="btn btn-outline btn-sm">
+                        Cloud Computing
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

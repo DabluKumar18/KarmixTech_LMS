@@ -1,0 +1,115 @@
+{% extends "dashboard.html" %}
+
+{% block title %}My Profile - KarmixTech LMS{% endblock %}
+
+{% block page_content %}
+<div class="page-header">
+    <h1 class="page-title">My Profile</h1>
+    <p class="page-subtitle">Manage your account information and preferences.</p>
+</div>
+
+<div style="display: grid; grid-template-columns: 300px 1fr; gap: 2rem;">
+    <!-- Profile Card -->
+    <div>
+        <div class="card">
+            <div class="card-body" style="text-align: center; padding: 2rem;">
+                <div class="user-avatar" style="width: 100px; height: 100px; font-size: 2rem; margin: 0 auto 1rem;">
+                    {{ current_user.first_name[0] }}{{ current_user.last_name[0] }}
+                </div>
+                <h3 style="margin-bottom: 0.25rem;">{{ current_user.full_name }}</h3>
+                <p style="color: var(--gray-500); margin-bottom: 1rem;">{{ current_user.email }}</p>
+
+                <span class="badge badge-primary">{{ current_user.role|title }}</span>
+
+                <div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--gray-200);">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div style="text-align: center;">
+                            <div style="font-size: 1.25rem; font-weight: 700; color: var(--gray-900);">{{ current_user.get_enrolled_courses_count() }}</div>
+                            <div style="font-size: 0.75rem; color: var(--gray-500);">Courses</div>
+                        </div>
+                        <div style="text-align: center;">
+                            <div style="font-size: 1.25rem; font-weight: 700; color: var(--gray-900);">{{ current_user.get_completed_courses_count() }}</div>
+                            <div style="font-size: 0.75rem; color: var(--gray-500);">Completed</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--gray-200);">
+                    <p style="font-size: 0.75rem; color: var(--gray-400); margin: 0;">
+                        Member since {{ current_user.created_at|date_format if current_user.created_at else 'N/A' }}
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Profile Form -->
+    <div>
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title"><i class="fas fa-user-edit" style="margin-right: 0.5rem;"></i> Personal Information</h3>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('student.profile') }}">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div class="form-group">
+                            <label class="form-label">First Name</label>
+                            <input type="text" name="first_name" class="form-control" value="{{ current_user.first_name }}" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Last Name</label>
+                            <input type="text" name="last_name" class="form-control" value="{{ current_user.last_name }}" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Email Address</label>
+                        <input type="email" class="form-control" value="{{ current_user.email }}" disabled>
+                        <div class="form-text">Email cannot be changed. Contact support for assistance.</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Phone Number</label>
+                        <input type="tel" name="phone" class="form-control" value="{{ current_user.phone or '' }}" placeholder="Enter phone number">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Bio</label>
+                        <textarea name="bio" class="form-control" rows="3" placeholder="Tell us about yourself...">{{ current_user.bio or '' }}</textarea>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div class="form-group">
+                            <label class="form-label">City</label>
+                            <input type="text" name="city" class="form-control" value="{{ current_user.city or '' }}" placeholder="Your city">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Country</label>
+                            <input type="text" name="country" class="form-control" value="{{ current_user.country or '' }}" placeholder="Your country">
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Save Changes
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <div class="card mt-3">
+            <div class="card-header">
+                <h3 class="card-title"><i class="fas fa-lock" style="margin-right: 0.5rem;"></i> Security</h3>
+            </div>
+            <div class="card-body" style="display: flex; align-items: center; justify-content: space-between;">
+                <div>
+                    <h4 style="font-size: 0.9rem; margin-bottom: 0.25rem;">Change Password</h4>
+                    <p style="color: var(--gray-500); font-size: 0.8rem; margin: 0;">Update your password to keep your account secure.</p>
+                </div>
+                <a href="{{ url_for('student.change_password') }}" class="btn btn-outline">
+                    <i class="fas fa-key"></i> Change Password
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

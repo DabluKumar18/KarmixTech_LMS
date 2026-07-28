@@ -1,0 +1,186 @@
+{% extends "dashboard.html" %}
+
+{% block title %}Student Dashboard - KarmixTech LMS{% endblock %}
+
+{% block page_content %}
+<div class="page-header">
+    <div style="display: flex; align-items: center; justify-content: space-between;">
+        <div>
+            <h1 class="page-title">Welcome back, {{ current_user.first_name }}!</h1>
+            <p class="page-subtitle">Track your learning progress and continue your journey.</p>
+        </div>
+        <a href="{{ url_for('student.browse_courses') }}" class="btn btn-primary">
+            <i class="fas fa-search"></i> Browse Courses
+        </a>
+    </div>
+</div>
+
+<!-- Stats Grid -->
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-icon primary">
+            <i class="fas fa-book"></i>
+        </div>
+        <div class="stat-content">
+            <h4>{{ stats.total_enrolled }}</h4>
+            <p>Enrolled Courses</p>
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon success">
+            <i class="fas fa-check-circle"></i>
+        </div>
+        <div class="stat-content">
+            <h4>{{ stats.completed }}</h4>
+            <p>Completed</p>
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon warning">
+            <i class="fas fa-spinner"></i>
+        </div>
+        <div class="stat-content">
+            <h4>{{ stats.in_progress }}</h4>
+            <p>In Progress</p>
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon info">
+            <i class="fas fa-percentage"></i>
+        </div>
+        <div class="stat-content">
+            <h4>{{ stats.overall_progress }}%</h4>
+            <p>Overall Progress</p>
+        </div>
+    </div>
+</div>
+
+<div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem;">
+    <!-- Continue Learning Section -->
+    <div>
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title"><i class="fas fa-play-circle" style="margin-right: 0.5rem;"></i> Continue Learning</h3>
+                <a href="{{ url_for('student.my_courses') }}" class="btn btn-sm btn-outline">View All</a>
+            </div>
+            <div class="card-body">
+                {% if in_progress %}
+                    {% for enrollment in in_progress %}
+                    <div style="display: flex; align-items: center; gap: 1rem; padding: 1rem; border-radius: var(--radius); margin-bottom: 0.75rem; {% if not loop.last %}border-bottom: 1px solid var(--gray-200);{% endif %}">
+                        <img src="{{ enrollment.course.thumbnail }}" alt="{{ enrollment.course.title }}"
+                             style="width: 100px; height: 60px; object-fit: cover; border-radius: var(--radius);">
+                        <div style="flex: 1;">
+                            <h4 style="font-size: 0.95rem; margin-bottom: 0.25rem;">
+                                <a href="{{ url_for('student.learn_course', course_id=enrollment.course.id) }}" style="color: var(--gray-900);">
+                                    {{ enrollment.course.title }}
+                                </a>
+                            </h4>
+                            <div class="progress-label">
+                                <span>{{ enrollment.progress_percentage|round }}% complete</span>
+                            </div>
+                            <div class="progress" style="height: 6px;">
+                                <div class="progress-bar{% if enrollment.progress_percentage >= 75 %} success{% endif %}" style="width: {{ enrollment.progress_percentage }}%;"></div>
+                            </div>
+                        </div>
+                        <a href="{{ url_for('student.learn_course', course_id=enrollment.course.id) }}" class="btn btn-primary btn-sm">
+                            <i class="fas fa-play"></i> Resume
+                        </a>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                <div class="empty-state">
+                    <div class="empty-state-icon">
+                        <i class="fas fa-book-open"></i>
+                    </div>
+                    <h3>No courses in progress</h3>
+                    <p>Start learning by enrolling in a course.</p>
+                    <a href="{{ url_for('student.browse_courses') }}" class="btn btn-primary">Browse Courses</a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Recommended Courses -->
+        {% if recommended %}
+        <div class="card mt-3">
+            <div class="card-header">
+                <h3 class="card-title"><i class="fas fa-star" style="margin-right: 0.5rem;"></i> Recommended for You</h3>
+            </div>
+            <div class="card-body">
+                <div style="display: grid; gap: 1rem;">
+                    {% for course in recommended %}
+                    <div style="display: flex; align-items: center; gap: 1rem;">
+                        <img src="{{ course.thumbnail }}" alt="{{ course.title }}"
+                             style="width: 80px; height: 50px; object-fit: cover; border-radius: var(--radius);">
+                        <div style="flex: 1;">
+                            <h4 style="font-size: 0.875rem; margin-bottom: 0;">
+                                <a href="{{ url_for('student.course_detail', course_id=course.id) }}">{{ course.title }}</a>
+                            </h4>
+                            <div style="font-size: 0.75rem; color: var(--gray-500); margin-top: 0.25rem;">
+                                {{ course.category }} &bull; {{ course.level }}
+                            </div>
+                        </div>
+                        <a href="{{ url_for('student.course_detail', course_id=course.id) }}" class="btn btn-sm btn-outline-primary">View</a>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Sidebar -->
+    <div>
+        <!-- Recent Notifications -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title"><i class="fas fa-bell" style="margin-right: 0.5rem;"></i> Notifications</h3>
+                <a href="{{ url_for('student.notifications') }}" class="btn btn-sm btn-outline">View All</a>
+            </div>
+            <div class="card-body" style="padding: 0.5rem 0;">
+                {% if notifications %}
+                    {% for notification in notifications[:5] %}
+                    <div style="padding: 0.75rem 1rem; {% if not notification.is_read %}background: var(--gray-50);{% endif %}">
+                        <div style="display: flex; align-items: flex-start; gap: 0.75rem;">
+                            <div style="width: 8px; height: 8px; border-radius: 50%; background: {% if notification.is_read %}var(--gray-300){% else %}var(--primary-color){% endif %}; margin-top: 6px;"></div>
+                            <div style="flex: 1;">
+                                <p style="font-weight: 500; margin: 0 0 0.25rem; font-size: 0.875rem;">{{ notification.title }}</p>
+                                <p style="color: var(--gray-500); font-size: 0.75rem; margin: 0;">{{ notification.message[:50] }}...</p>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                <div style="padding: 1.5rem; text-align: center; color: var(--gray-500);">
+                    <p>No new notifications</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Quick Stats -->
+        <div class="card mt-3">
+            <div class="card-header">
+                <h3 class="card-title"><i class="fas fa-chart-line" style="margin-right: 0.5rem;"></i> Quick Stats</h3>
+            </div>
+            <div class="card-body">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
+                    <span style="color: var(--gray-500);">This Month</span>
+                    <span style="font-weight: 600; color: var(--gray-800);">{{ stats.completed }} completed</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
+                    <span style="color: var(--gray-500);">Total Time</span>
+                    <span style="font-weight: 600; color: var(--gray-800);">--</span>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                    <span style="color: var(--gray-500);">Rank</span>
+                    <span style="font-weight: 600; color: var(--gray-800);">#{{ current_user.id }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

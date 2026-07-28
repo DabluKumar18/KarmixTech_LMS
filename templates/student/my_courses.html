@@ -1,0 +1,128 @@
+{% extends "dashboard.html" %}
+
+{% block title %}My Courses - KarmixTech LMS{% endblock %}
+
+{% block page_content %}
+<div class="page-header">
+    <h1 class="page-title">My Courses</h1>
+    <p class="page-subtitle">Track your enrollment progress and continue learning.</p>
+</div>
+
+<!-- Tabs -->
+<div style="display: flex; gap: 0.5rem; margin-bottom: 1.5rem;">
+    <a href="#in-progress" class="btn btn-primary">
+        <i class="fas fa-spinner"></i> In Progress ({{ in_progress|length }})
+    </a>
+    <a href="#completed" class="btn btn-outline">
+        <i class="fas fa-check-circle"></i> Completed ({{ completed|length }})
+    </a>
+</div>
+
+<!-- In Progress Courses -->
+<section id="in-progress">
+    <h3 style="margin-bottom: 1rem;"><i class="fas fa-spinner" style="margin-right: 0.5rem;"></i> In Progress</h3>
+
+    {% if in_progress %}
+    <div class="courses-grid">
+        {% for enrollment in in_progress %}
+        <div class="course-card">
+            <div class="course-thumbnail">
+                <img src="{{ enrollment.course.thumbnail }}" alt="{{ enrollment.course.title }}">
+                <span class="course-badge level">{{ enrollment.course.level }}</span>
+            </div>
+            <div class="course-content">
+                <div class="course-category">{{ enrollment.course.category }}</div>
+                <h3 class="course-title">
+                    <a href="{{ url_for('student.learn_course', course_id=enrollment.course.id) }}">{{ enrollment.course.title }}</a>
+                </h3>
+
+                <div class="progress-label" style="margin-bottom: 0.25rem;">
+                    <span>Progress</span>
+                    <span>{{ enrollment.progress_percentage|round }}%</span>
+                </div>
+                <div class="progress" style="height: 8px; margin-bottom: 1rem;">
+                    <div class="progress-bar{% if enrollment.progress_percentage >= 75 %} success{% elif enrollment.progress_percentage >= 50 %}{% elif enrollment.progress_percentage < 25 %} danger{% endif %}" style="width: {{ enrollment.progress_percentage }}%;"></div>
+                </div>
+
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 0.5rem;">
+                    <span style="font-size: 0.75rem; color: var(--gray-500);">
+                        {% if enrollment.last_accessed %}
+                        Last: {{ enrollment.last_accessed|time_ago }}
+                        {% else %}
+                        Not started
+                        {% endif %}
+                    </span>
+                    <a href="{{ url_for('student.learn_course', course_id=enrollment.course.id) }}" class="btn btn-primary btn-sm">
+                        <i class="fas fa-play"></i> Resume
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state" style="background: var(--white); border-radius: var(--radius-lg); padding: 3rem;">
+        <div class="empty-state-icon">
+            <i class="fas fa-book-open"></i>
+        </div>
+        <h3>No courses in progress</h3>
+        <p>You haven't started any courses yet. Browse our catalog to begin learning!</p>
+        <a href="{{ url_for('student.browse_courses') }}" class="btn btn-primary">Browse Courses</a>
+    </div>
+    {% endif %}
+</section>
+
+<!-- Completed Courses -->
+<section id="completed" style="margin-top: 2.5rem;">
+    <h3 style="margin-bottom: 1rem;"><i class="fas fa-check-circle" style="margin-right: 0.5rem; color: var(--success-color);"></i> Completed</h3>
+
+    {% if completed %}
+    <div class="courses-grid">
+        {% for enrollment in completed %}
+        <div class="course-card" style="border-color: var(--success-color);">
+            <div class="course-thumbnail">
+                <img src="{{ enrollment.course.thumbnail }}" alt="{{ enrollment.course.title }}">
+                <span class="course-badge" style="background: var(--success-color); top: 1rem; left: 1rem;">
+                    <i class="fas fa-check"></i> Completed
+                </span>
+            </div>
+            <div class="course-content">
+                <div class="course-category">{{ enrollment.course.category }}</div>
+                <h3 class="course-title">
+                    <a href="{{ url_for('student.learn_course', course_id=enrollment.course.id) }}">{{ enrollment.course.title }}</a>
+                </h3>
+
+                <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.75rem; color: var(--success-color);">
+                    <i class="fas fa-certificate"></i>
+                    <span style="font-weight: 500;">Certificate Earned</span>
+                </div>
+
+                <div style="font-size: 0.75rem; color: var(--gray-500);">
+                    Completed on {{ enrollment.completed_at|date_format if enrollment.completed_at else 'N/A' }}
+                </div>
+
+                <div style="margin-top: 1rem;">
+                    <a href="{{ url_for('student.learn_course', course_id=enrollment.course.id) }}" class="btn btn-outline btn-sm">
+                        <i class="fas fa-redo"></i> Review Course
+                    </a>
+                    {% if enrollment.certificate_url %}
+                    <a href="{{ enrollment.certificate_url }}" class="btn btn-success btn-sm" style="margin-left: 0.5rem;">
+                        <i class="fas fa-download"></i> Certificate
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state" style="background: var(--white); border-radius: var(--radius-lg); padding: 3rem;">
+        <div class="empty-state-icon">
+            <i class="fas fa-trophy"></i>
+        </div>
+        <h3>No completed courses yet</h3>
+        <p>Complete your enrolled courses to earn certificates!</p>
+    </div>
+    {% endif %}
+</section>
+{% endblock %}

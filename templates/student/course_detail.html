@@ -1,0 +1,205 @@
+{% extends "dashboard.html" %}
+
+{% block title %}{{ course.title }} - KarmixTech LMS{% endblock %}
+
+{% block page_content %}
+<!-- Breadcrumb -->
+<div style="margin-bottom: 1rem; font-size: 0.875rem;">
+    <a href="{{ url_for('student.browse_courses') }}" style="color: var(--gray-500);">Courses</a>
+    <span style="color: var(--gray-400); margin: 0 0.5rem;">/</span>
+    <span style="color: var(--gray-700);">{{ course.title }}</span>
+</div>
+
+<div style="display: grid; grid-template-columns: 1fr 350px; gap: 2rem;">
+    <!-- Course Content -->
+    <div>
+        <!-- Course Header -->
+        <div class="card mb-3">
+            <div class="course-thumbnail" style="height: 250px; border-radius: var(--radius-lg);">
+                <img src="{{ course.thumbnail }}" alt="{{ course.title }}">
+                <span class="course-badge level">{{ course.level }}</span>
+                {% if course.is_free %}
+                <span class="course-badge free">Free</span>
+                {% endif %}
+            </div>
+            <div class="card-body">
+                <div class="course-category">{{ course.category }}</div>
+                <h1 style="font-size: 1.5rem; margin-bottom: 1rem;">{{ course.title }}</h1>
+
+                <div style="display: flex; flex-wrap: wrap; gap: 1.5rem; margin-bottom: 1.5rem; color: var(--gray-500); font-size: 0.9rem;">
+                    <span><i class="fas fa-clock"></i> {{ course.duration_hours }} hours</span>
+                    <span><i class="fas fa-signal"></i> {{ course.level }}</span>
+                    <span><i class="fas fa-user-graduate"></i> {{ course.enrolled_students_count }} students</span>
+                    <span><i class="fas fa-globe"></i> {{ course.language }}</span>
+                </div>
+
+                <p style="color: var(--gray-600); line-height: 1.8; margin-bottom: 0;">{{ course.description }}</p>
+            </div>
+        </div>
+
+        <!-- What You'll Learn -->
+        {% if course.what_you_learn %}
+        <div class="card mb-3">
+            <div class="card-header">
+                <h3 class="card-title"><i class="fas fa-lightbulb" style="margin-right: 0.5rem; color: var(--warning-color);"></i> What You'll Learn</h3>
+            </div>
+            <div class="card-body">
+                <div style="white-space: pre-line; color: var(--gray-600);">{{ course.what_you_learn }}</div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Requirements -->
+        {% if course.requirements %}
+        <div class="card mb-3">
+            <div class="card-header">
+                <h3 class="card-title"><i class="fas fa-list-check" style="margin-right: 0.5rem;"></i> Requirements</h3>
+            </div>
+            <div class="card-body">
+                <div style="white-space: pre-line; color: var(--gray-600);">{{ course.requirements }}</div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Course Curriculum -->
+        {% if course.modules.all() %}
+        <div class="card mb-3">
+            <div class="card-header">
+                <h3 class="card-title"><i class="fas fa-layer-group" style="margin-right: 0.5rem;"></i> Course Curriculum</h3>
+            </div>
+            <div class="card-body" style="padding: 0;">
+                {% for module in course.modules.all() %}
+                <details style="border-bottom: 1px solid var(--gray-200);" {% if loop.first %}open{% endif %}>
+                    <summary style="padding: 1rem 1.25rem; cursor: pointer; display: flex; align-items: center; gap: 0.75rem; font-weight: 500;">
+                        <i class="fas fa-chevron-right" style="font-size: 0.75rem; color: var(--gray-400);"></i>
+                        {{ module.title }}
+                        <span style="margin-left: auto; font-size: 0.75rem; color: var(--gray-500);">{{ module.lessons.count() }} lessons</span>
+                    </summary>
+                    <div style="padding: 0 1.25rem 1rem;">
+                        {% for lesson in module.lessons.all() %}
+                        <div style="display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem 0; {% if not loop.last %}border-bottom: 1px dashed var(--gray-200);{% endif %}">
+                            <i class="fas fa-play-circle" style="color: var(--primary-color);"></i>
+                            <span style="flex: 1;">{{ lesson.title }}</span>
+                            <span style="font-size: 0.75rem; color: var(--gray-400);">{{ lesson.duration_minutes }} min</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </details>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Similar Courses -->
+        {% if similar_courses %}
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title"><i class="fas fa-th-large" style="margin-right: 0.5rem;"></i> Similar Courses</h3>
+            </div>
+            <div class="card-body">
+                <div style="display: grid; gap: 1rem;">
+                    {% for similar in similar_courses %}
+                    <div style="display: flex; align-items: center; gap: 1rem;">
+                        <img src="{{ similar.thumbnail }}" alt="{{ similar.title }}"
+                             style="width: 80px; height: 50px; object-fit: cover; border-radius: var(--radius);">
+                        <div style="flex: 1;">
+                            <h4 style="font-size: 0.9rem; margin-bottom: 0.25rem;">
+                                <a href="{{ url_for('student.course_detail', course_id=similar.id) }}">{{ similar.title }}</a>
+                            </h4>
+                            <div style="font-size: 0.75rem; color: var(--gray-500);">{{ similar.level }} &bull; {{ similar.duration_hours }}h</div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Sidebar -->
+    <div>
+        <div class="card" style="position: sticky; top: 80px;">
+            <div class="card-body" style="padding: 1.5rem;">
+                <!-- Price -->
+                <div style="text-align: center; margin-bottom: 1.5rem;">
+                    {% if course.is_free %}
+                    <div style="font-size: 2rem; font-weight: 700; color: var(--success-color);">FREE</div>
+                    <p style="color: var(--gray-500);">No cost for enrollment</p>
+                    {% else %}
+                    <div style="font-size: 2rem; font-weight: 700; color: var(--gray-900);">${{ course.price }}</div>
+                    <p style="color: var(--gray-500);">One-time payment</p>
+                    {% endif %}
+                </div>
+
+                <!-- Enroll Button -->
+                {% if is_enrolled %}
+                <a href="{{ url_for('student.learn_course', course_id=course.id) }}" class="btn btn-success btn-block btn-lg">
+                    <i class="fas fa-play"></i> Continue Learning
+                </a>
+                <div style="text-align: center; margin-top: 0.75rem;">
+                    <span class="badge badge-success">Already Enrolled</span>
+                </div>
+
+                <!-- Progress Bar -->
+                {% if enrollment %}
+                <div style="margin-top: 1rem;">
+                    <div class="progress-label">
+                        <span>Progress</span>
+                        <span>{{ enrollment.progress_percentage|round }}%</span>
+                    </div>
+                    <div class="progress">
+                        <div class="progress-bar" style="width: {{ enrollment.progress_percentage }}%;"></div>
+                    </div>
+                </div>
+                {% endif %}
+                {% else %}
+                <form method="POST" action="{{ url_for('student.enroll_course', course_id=course.id) }}">
+                    <button type="submit" class="btn btn-primary btn-block btn-lg">
+                        <i class="fas fa-plus-circle"></i> Enroll Now
+                    </button>
+                </form>
+                <p style="text-align: center; margin-top: 0.75rem; font-size: 0.75rem; color: var(--gray-500);">
+                    Join {{ course.enrolled_students_count }} other students
+                </p>
+                {% endif %}
+
+                <div style="border-top: 1px solid var(--gray-200); margin-top: 1.5rem; padding-top: 1.5rem;">
+                    <h4 style="font-size: 0.9rem; margin-bottom: 1rem;">Course Includes</h4>
+                    <ul style="list-style: none; padding: 0; margin: 0;">
+                        <li style="padding: 0.5rem 0; display: flex; align-items: center; gap: 0.75rem; color: var(--gray-600); font-size: 0.875rem;">
+                            <i class="fas fa-clock" style="color: var(--primary-color);"></i>
+                            {{ course.duration_hours }} hours of content
+                        </li>
+                        <li style="padding: 0.5rem 0; display: flex; align-items: center; gap: 0.75rem; color: var(--gray-600); font-size: 0.875rem;">
+                            <i class="fas fa-layer-group" style="color: var(--primary-color);"></i>
+                            {{ course.modules_count }} modules
+                        </li>
+                        <li style="padding: 0.5rem 0; display: flex; align-items: center; gap: 0.75rem; color: var(--gray-600); font-size: 0.875rem;">
+                            <i class="fas fa-globe" style="color: var(--primary-color);"></i>
+                            {{ course.language }}
+                        </li>
+                        <li style="padding: 0.5rem 0; display: flex; align-items: center; gap: 0.75rem; color: var(--gray-600); font-size: 0.875rem;">
+                            <i class="fas fa-certificate" style="color: var(--primary-color);"></i>
+                            Certificate of completion
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Instructor -->
+                <div style="border-top: 1px solid var(--gray-200); margin-top: 1.5rem; padding-top: 1.5rem;">
+                    <h4 style="font-size: 0.9rem; margin-bottom: 1rem;">Instructor</h4>
+                    <div style="display: flex; align-items: center; gap: 1rem;">
+                        <div class="user-avatar" style="width: 50px; height: 50px; font-size: 1rem;">
+                            {{ course.instructor[0] if course.instructor else 'E' }}
+                        </div>
+                        <div>
+                            <div style="font-weight: 600; color: var(--gray-800);">{{ course.instructor or 'Expert Instructor' }}</div>
+                            <div style="font-size: 0.75rem; color: var(--gray-500);">Course Creator</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

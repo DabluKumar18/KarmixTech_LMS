@@ -1,0 +1,131 @@
+{% extends "dashboard.html" %}
+
+{% block title %}Browse Courses - KarmixTech LMS{% endblock %}
+
+{% block page_content %}
+<div class="page-header">
+    <h1 class="page-title">Browse Courses</h1>
+    <p class="page-subtitle">Discover and enroll in courses to enhance your skills.</p>
+</div>
+
+<!-- Search and Filters -->
+<div class="card mb-3">
+    <div class="card-body">
+        <form method="GET" action="{{ url_for('student.browse_courses') }}" style="display: flex; gap: 1rem; flex-wrap: wrap; align-items: center;">
+            <div style="flex: 1; min-width: 200px;">
+                <div class="header-search" style="width: 100%; position: relative;">
+                    <i class="fas fa-search" style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: var(--gray-400);"></i>
+                    <input type="text" name="search" class="form-control" placeholder="Search courses..."
+                           value="{{ search }}" style="padding-left: 2.5rem;">
+                </div>
+            </div>
+
+            <div style="min-width: 150px;">
+                <select name="category" class="form-control">
+                    <option value="">All Categories</option>
+                    {% for cat in categories %}
+                    <option value="{{ cat }}" {% if selected_category == cat %}selected{% endif %}>{{ cat }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div style="min-width: 120px;">
+                <select name="level" class="form-control">
+                    <option value="">All Levels</option>
+                    {% for lvl in levels %}
+                    <option value="{{ lvl }}" {% if selected_level == lvl %}selected{% endif %}>{{ lvl }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-filter"></i> Filter
+            </button>
+
+            <a href="{{ url_for('student.browse_courses') }}" class="btn btn-outline">
+                Clear
+            </a>
+        </form>
+    </div>
+</div>
+
+<!-- Courses Grid -->
+{% if courses %}
+<div class="courses-grid">
+    {% for course in courses %}
+    <div class="course-card">
+        <div class="course-thumbnail">
+            <img src="{{ course.thumbnail }}" alt="{{ course.title }}">
+            <span class="course-badge level">{{ course.level }}</span>
+            {% if course.is_free %}
+            <span class="course-badge free">Free</span>
+            {% endif %}
+        </div>
+        <div class="course-content">
+            <div class="course-category">{{ course.category }}</div>
+            <h3 class="course-title">
+                <a href="{{ url_for('student.course_detail', course_id=course.id) }}">{{ course.title }}</a>
+            </h3>
+            <p style="color: var(--gray-500); font-size: 0.85rem; margin: 0.5rem 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+                {{ course.short_description or course.description[:150] }}...
+            </p>
+            <div class="course-meta">
+                <span><i class="fas fa-clock"></i> {{ course.duration_hours }}h</span>
+                <span><i class="fas fa-signal"></i> {{ course.level }}</span>
+                <span><i class="fas fa-user-graduate"></i> {{ course.enrolled_students_count }}</span>
+            </div>
+            <div class="course-footer">
+                <div class="course-instructor">
+                    <div class="instructor-avatar">
+                        {{ course.instructor[0] if course.instructor else 'E' }}
+                    </div>
+                    <span class="instructor-name">{{ course.instructor or 'Expert' }}</span>
+                </div>
+                <a href="{{ url_for('student.course_detail', course_id=course.id) }}" class="btn btn-sm btn-primary">
+                    View <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Pagination -->
+{% if pagination.pages > 1 %}
+<div class="pagination">
+    {% if pagination.has_prev %}
+    <a href="{{ url_for('student.browse_courses', page=pagination.prev_num, search=search, category=selected_category, level=selected_level) }}" class="pagination-item">
+        <i class="fas fa-chevron-left"></i>
+    </a>
+    {% endif %}
+
+    {% for page_num in pagination.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
+        {% if page_num %}
+        <a href="{{ url_for('student.browse_courses', page=page_num, search=search, category=selected_category, level=selected_level) }}"
+           class="pagination-item {% if page_num == pagination.page %}active{% endif %}">
+            {{ page_num }}
+        </a>
+        {% else %}
+        <span class="pagination-item disabled">...</span>
+        {% endif %}
+    {% endfor %}
+
+    {% if pagination.has_next %}
+    <a href="{{ url_for('student.browse_courses', page=pagination.next_num, search=search, category=selected_category, level=selected_level) }}" class="pagination-item">
+        <i class="fas fa-chevron-right"></i>
+    </a>
+    {% endif %}
+</div>
+{% endif %}
+
+{% else %}
+<div class="empty-state" style="padding: 4rem;">
+    <div class="empty-state-icon">
+        <i class="fas fa-search"></i>
+    </div>
+    <h3>No courses found</h3>
+    <p>Try adjusting your search or filters to find what you're looking for.</p>
+    <a href="{{ url_for('student.browse_courses') }}" class="btn btn-primary">Clear Filters</a>
+</div>
+{% endif %}
+{% endblock %}

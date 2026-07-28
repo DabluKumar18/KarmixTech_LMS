@@ -1,0 +1,291 @@
+{% extends "dashboard.html" %}
+
+{% block title %}{{ course.title }} - Learning{% endblock %}
+
+{% block page_content %}
+<div class="page-header" style="margin-bottom: 0.5rem;">
+    <div style="display: flex; align-items: center; justify-content: space-between;">
+        <div>
+            <a href="{{ url_for('student.my_courses') }}" style="color: var(--gray-500); font-size: 0.85rem;">
+                <i class="fas fa-arrow-left"></i> My Courses
+            </a>
+        </div>
+        <div style="display: flex; align-items: center; gap: 0.5rem;">
+            {% if enrollment.is_completed %}
+            <a href="{{ url_for('student.view_certificate', course_id=course.id) }}" class="btn btn-success btn-sm">
+                <i class="fas fa-certificate"></i> View Certificate
+            </a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Progress Bar -->
+<div class="card mb-2" style="padding: 1rem;">
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem;">
+        <h3 style="font-size: 1rem; margin: 0;">{{ course.title }}</h3>
+        <div style="display: flex; align-items: center; gap: 1rem;">
+            <span style="font-size: 0.85rem; color: var(--gray-500);">
+                <i class="fas fa-book"></i> {{ completed_lessons }}/{{ total_lessons }} lessons
+            </span>
+            <span style="font-weight: 600; color: {% if enrollment.progress_percentage >= 100 %}var(--success-color){% else %}var(--primary-color){% endif %};">
+                {{ enrollment.progress_percentage|round(1) }}%
+            </span>
+        </div>
+    </div>
+    <div class="progress" style="height: 10px;">
+        <div class="progress-bar {% if enrollment.progress_percentage >= 100 %}success{% endif %}" style="width: {{ enrollment.progress_percentage }}%;"></div>
+    </div>
+</div>
+
+<div style="display: grid; grid-template-columns: 280px 1fr; gap: 1rem; min-height: calc(100vh - 200px);">
+    <!-- Sidebar - Course Navigation -->
+    <div>
+        <div class="card" style="position: sticky; top: 80px; max-height: calc(100vh - 160px); overflow-y: auto;">
+            <div class="card-header" style="position: sticky; top: 0; background: var(--white); z-index: 10;">
+                <h3 class="card-title">Course Content</h3>
+            </div>
+            <div class="card-body" style="padding: 0;">
+                {% for item in modules_data %}
+                <div style="border-bottom: 1px solid var(--gray-200);">
+                    <div style="padding: 0.75rem 1rem; background: var(--gray-50); font-weight: 500; font-size: 0.85rem; display: flex; align-items: center; gap: 0.5rem;">
+                        <i class="fas fa-folder" style="color: var(--primary-color); font-size: 0.75rem;"></i>
+                        <span>{{ item.module.title[:25] }}{% if item.module.title|length > 25 %}...{% endif %}</span>
+                        <span style="margin-left: auto; color: var(--gray-400); font-size: 0.7rem;">{{ item.module.lessons_count }}</span>
+                    </div>
+                    {% for lesson in item.lessons %}
+                    <a href="{{ url_for('student.learn_course', course_id=course.id, lesson_id=lesson.id) }}"
+                       class="lesson-nav-item {% if current_lesson and current_lesson.id == lesson.id %}active{% endif %}"
+                       style="padding: 0.75rem 1rem 0.75rem 1.5rem; display: flex; align-items: center; gap: 0.75rem; text-decoration: none; color: var(--gray-600); font-size: 0.85rem; border-left: 3px solid transparent; {% if current_lesson and current_lesson.id == lesson.id %}background: rgba(37, 99, 235, 0.1); border-left-color: var(--primary-color); color: var(--gray-800);{% endif %} {% if lesson_progress_map.get(lesson.id) and lesson_progress_map.get(lesson.id).is_completed %}color: var(--success-color);{% endif %}">
+                        <i class="fas fa-{% if lesson_progress_map.get(lesson.id) and lesson_progress_map.get(lesson.id).is_completed %}check-circle{% elif lesson.youtube_video_id %}play-circle{% else %}file-alt{% endif %}" style="font-size: 0.8rem;"></i>
+                        <span style="flex: 1;">{{ lesson.title[:30] }}{% if lesson.title|length > 30 %}...{% endif %}</span>
+                        <span style="font-size: 0.7rem; color: var(--gray-400);">{{ lesson.duration_minutes }}m</span>
+                    </a>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div style="padding: 2rem; text-align: center; color: var(--gray-400);">
+                    <p>No content available</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div>
+        {% if current_lesson %}
+        <div class="card">
+            <!-- Video Player -->
+            <div style="background: var(--gray-900); aspect-ratio: 16/9; border-radius: var(--radius-lg) var(--radius-lg) 0 0; position: relative; overflow: hidden;">
+                {% if current_lesson.youtube_video_id %}
+                <iframe src="https://www.youtube.com/embed/{{ current_lesson.youtube_video_id }}?rel=0"
+                        style="width: 100%; height: 100%; border: none;"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowfullscreen
+                        id="videoPlayer"></iframe>
+                {% else %}
+                <div style="display: flex; align-items: center; justify-content: center; height: 100%; color: var(--gray-400);">
+                    <div style="text-align: center;">
+                        <i class="fas fa-video-slash" style="font-size: 3rem; margin-bottom: 1rem;"></i>
+                        <p>No video available for this lesson</p>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Lesson Progress Badge -->
+                <div style="position: absolute; top: 1rem; right: 1rem;">
+                    {% if lesson_progress and lesson_progress.is_completed %}
+                    <span class="badge badge-success" style="padding: 0.5rem 1rem; font-size: 0.85rem;">
+                        <i class="fas fa-check"></i> Completed
+                    </span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Lesson Header -->
+            <div class="card-body">
+                <div style="display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 1rem;">
+                    <div>
+                        <div style="font-size: 0.8rem; color: var(--gray-400); margin-bottom: 0.25rem;">
+                            {{ current_module.title if current_module else '' }}
+                        </div>
+                        <h2 style="font-size: 1.25rem; margin: 0;">{{ current_lesson.title }}</h2>
+                    </div>
+                    <div style="display: flex; gap: 0.5rem;">
+                        {% if not lesson_progress or not lesson_progress.is_completed %}
+                        <button onclick="markLessonComplete({{ current_lesson.id }})" class="btn btn-success" id="completeBtn">
+                            <i class="fas fa-check"></i> Mark Complete
+                        </button>
+                        {% else %}
+                        <span class="badge badge-success" style="padding: 0.5rem 1rem; font-size: 0.85rem;">
+                            <i class="fas fa-check-circle"></i> Completed
+                        </span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Lesson Description -->
+                {% if current_lesson.description or current_lesson.content %}
+                <div style="background: var(--gray-50); padding: 1rem; border-radius: var(--radius); margin-bottom: 1rem;">
+                    <h4 style="font-size: 0.9rem; margin-bottom: 0.5rem;">About This Lesson</h4>
+                    <p style="color: var(--gray-600); font-size: 0.9rem; margin: 0; line-height: 1.6;">
+                        {{ current_lesson.description or current_lesson.content }}
+                    </p>
+                </div>
+                {% endif %}
+
+                <!-- Download PDF -->
+                {% if current_lesson.pdf_url %}
+                <div style="background: rgba(220, 38, 38, 0.05); border: 1px solid rgba(220, 38, 38, 0.2); padding: 1rem; border-radius: var(--radius); margin-bottom: 1rem;">
+                    <div style="display: flex; align-items: center; justify-content: space-between;">
+                        <div style="display: flex; align-items: center; gap: 0.75rem;">
+                            <div style="width: 40px; height: 40px; background: var(--danger-color); border-radius: var(--radius); display: flex; align-items: center; justify-content: center;">
+                                <i class="fas fa-file-pdf" style="color: var(--white);"></i>
+                            </div>
+                            <div>
+                                <div style="font-weight: 500;">Lesson Notes</div>
+                                <div style="font-size: 0.8rem; color: var(--gray-500);">Download PDF resource</div>
+                            </div>
+                        </div>
+                        <a href="{{ current_lesson.pdf_url }}" target="_blank" class="btn btn-outline" style="color: var(--danger-color); border-color: var(--danger-color);">
+                            <i class="fas fa-download"></i> Download PDF
+                        </a>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Navigation -->
+                <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 1rem; border-top: 1px solid var(--gray-200);">
+                    {% if prev_lesson %}
+                    <a href="{{ url_for('student.learn_course', course_id=course.id, lesson_id=prev_lesson.id) }}" class="btn btn-outline">
+                        <i class="fas fa-chevron-left"></i> Previous
+                    </a>
+                    {% else %}
+                    <div></div>
+                    {% endif %}
+
+                    {% if next_lesson %}
+                    <a href="{{ url_for('student.learn_course', course_id=course.id, lesson_id=next_lesson.id) }}" class="btn btn-primary">
+                        Next <i class="fas fa-chevron-right"></i>
+                    </a>
+                    {% elif enrollment.is_completed %}
+                    <a href="{{ url_for('student.view_certificate', course_id=course.id) }}" class="btn btn-success">
+                        <i class="fas fa-certificate"></i> Get Certificate
+                    </a>
+                    {% else %}
+                    <div class="alert alert-info" style="margin: 0; padding: 0.5rem 1rem;">
+                        <i class="fas fa-trophy"></i> You've reached the end!
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Lesson Info Card -->
+        <div class="card mt-2">
+            <div class="card-header">
+                <h3 class="card-title">Lesson Details</h3>
+            </div>
+            <div class="card-body">
+                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem;">
+                    <div style="text-align: center; padding: 1rem; background: var(--gray-50); border-radius: var(--radius);">
+                        <div style="font-size: 1.25rem; font-weight: 700; color: var(--gray-800);">{{ current_lesson.duration_minutes }}</div>
+                        <div style="font-size: 0.75rem; color: var(--gray-500);">Minutes</div>
+                    </div>
+                    <div style="text-align: center; padding: 1rem; background: var(--gray-50); border-radius: var(--radius);">
+                        <div style="font-size: 1.25rem; font-weight: 700; color: var(--success-color);">{{ completed_lessons }}</div>
+                        <div style="font-size: 0.75rem; color: var(--gray-500);">Completed</div>
+                    </div>
+                    <div style="text-align: center; padding: 1rem; background: var(--gray-50); border-radius: var(--radius);">
+                        <div style="font-size: 1.25rem; font-weight: 700; color: var(--primary-color);">{{ enrollment.progress_percentage|round(1) }}%</div>
+                        <div style="font-size: 0.75rem; color: var(--gray-500);">Progress</div>
+                    </div>
+                    <div style="text-align: center; padding: 1rem; background: var(--gray-50); border-radius: var(--radius);">
+                        <div style="font-size: 1.25rem; font-weight: 700; color: var(--gray-800);">{{ total_lessons - completed_lessons }}</div>
+                        <div style="font-size: 0.75rem; color: var(--gray-500);">Remaining</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {% else %}
+        <div class="card">
+            <div class="card-body" style="text-align: center; padding: 4rem;">
+                <div class="empty-state-icon">
+                    <i class="fas fa-book-open"></i>
+                </div>
+                <h3>Select a lesson to start learning</h3>
+                <p>Choose a lesson from the sidebar to begin.</p>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function markLessonComplete(lessonId) {
+    fetch(`/student/lesson/${lessonId}/complete`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Update button
+            const btn = document.getElementById('completeBtn');
+            if (btn) {
+                btn.outerHTML = '<span class="badge badge-success" style="padding: 0.5rem 1rem; font-size: 0.85rem;"><i class="fas fa-check-circle"></i> Completed</span>';
+            }
+
+            // Show success message
+            showAlert('success', 'Lesson marked as complete!');
+
+            // Update progress bar
+            setTimeout(() => {
+                location.reload();
+            }, 1500);
+        } else {
+            showAlert('danger', data.error || 'Failed to mark lesson complete');
+        }
+    })
+    .catch(error => {
+        showAlert('danger', 'An error occurred');
+    });
+}
+
+// Track video progress
+let lastTime = 0;
+let trackingInterval;
+
+function startTracking(lessonId, courseId) {
+    trackingInterval = setInterval(() => {
+        const player = document.getElementById('videoPlayer');
+        if (player && player.contentWindow) {
+            // YouTube API tracking would go here
+            // For now, just send periodic updates
+            fetch(`/student/lesson/${lessonId}/progress`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    time_spent_seconds: 30
+                })
+            });
+        }
+    }, 30000); // Every 30 seconds
+}
+
+// Called when page unloads
+window.addEventListener('beforeunload', function() {
+    if (trackingInterval) {
+        clearInterval(trackingInterval);
+    }
+});
+</script>
+{% endblock %}

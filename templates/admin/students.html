@@ -1,0 +1,130 @@
+{% extends "dashboard.html" %}
+
+{% block title %}Manage Students - KarmixTech LMS{% endblock %}
+
+{% block page_content %}
+<div class="page-header">
+    <h1 class="page-title">Manage Students</h1>
+    <p class="page-subtitle">View and manage all registered students on the platform.</p>
+</div>
+
+<!-- Search -->
+<div class="card mb-3">
+    <div class="card-body" style="padding: 1rem;">
+        <form method="GET" style="display: flex; gap: 1rem; align-items: center;">
+            <div style="flex: 1; position: relative;">
+                <i class="fas fa-search" style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: var(--gray-400);"></i>
+                <input type="text" name="search" class="form-control" placeholder="Search by name or email..."
+                       value="{{ search }}" style="padding-left: 2.5rem;">
+            </div>
+            <button type="submit" class="btn btn-primary">Search</button>
+        </form>
+    </div>
+</div>
+
+<!-- Students Table -->
+<div class="card">
+    <div class="table-container">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Student</th>
+                    <th>Email</th>
+                    <th>Joined</th>
+                    <th>Courses</th>
+                    <th>Status</th>
+                    <th>Last Login</th>
+                    <th style="width: 100px;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for student in students.items %}
+                <tr>
+                    <td>
+                        <div style="display: flex; align-items: center; gap: 0.75rem;">
+                            <div class="user-avatar" style="width: 40px; height: 40px; font-size: 0.875rem;">
+                                {{ student.first_name[0] }}{{ student.last_name[0] }}
+                            </div>
+                            <div>
+                                <div style="font-weight: 500;">{{ student.full_name }}</div>
+                                <div style="font-size: 0.75rem; color: var(--gray-400);">ID: {{ student.id }}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td style="color: var(--gray-600);">{{ student.email }}</td>
+                    <td style="color: var(--gray-500);">{{ student.created_at|date_format }}</td>
+                    <td>
+                        <div style="display: flex; flex-direction: column; gap: 0.25rem;">
+                            <span><strong>{{ student.get_enrolled_courses_count() }}</strong> enrolled</span>
+                            <span style="color: var(--success-color);">{{ student.get_completed_courses_count() }} completed</span>
+                        </div>
+                    </td>
+                    <td>
+                        {% if student.is_active %}
+                        <span class="badge badge-success">Active</span>
+                        {% else %}
+                        <span class="badge badge-danger">Inactive</span>
+                        {% endif %}
+                    </td>
+                    <td style="color: var(--gray-500);">{{ student.last_login|time_ago if student.last_login else 'Never' }}</td>
+                    <td>
+                        <div style="display: flex; gap: 0.5rem;">
+                            <a href="{{ url_for('admin.student_detail', student_id=student.id) }}" class="btn btn-sm btn-outline" title="View Details">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                            <form method="POST" action="{{ url_for('admin.toggle_student_status', student_id=student.id) }}" style="display: inline;">
+                                <button type="submit" class="btn btn-sm {% if student.is_active %}btn-danger{% else %}btn-success{% endif %}" title="{% if student.is_active %}Deactivate{% else %}Activate{% endif %}">
+                                    <i class="fas fa-{% if student.is_active %}ban{% else %}check{% endif %}"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="7" style="text-align: center; padding: 3rem;">
+                        <div class="empty-state">
+                            <div class="empty-state-icon">
+                                <i class="fas fa-users"></i>
+                            </div>
+                            <h3>No students found</h3>
+                            <p>No students match your search criteria.</p>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination -->
+    {% if students.pages > 1 %}
+    <div class="card-footer" style="display: flex; justify-content: center;">
+        <div class="pagination">
+            {% if students.has_prev %}
+            <a href="{{ url_for('admin.manage_students', page=students.prev_num, search=search) }}" class="pagination-item">
+                <i class="fas fa-chevron-left"></i>
+            </a>
+            {% endif %}
+
+            {% for page_num in students.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
+                {% if page_num %}
+                <a href="{{ url_for('admin.manage_students', page=page_num, search=search) }}"
+                   class="pagination-item {% if page_num == students.page %}active{% endif %}">
+                    {{ page_num }}
+                </a>
+                {% else %}
+                <span class="pagination-item disabled">...</span>
+                {% endif %}
+            {% endfor %}
+
+            {% if students.has_next %}
+            <a href="{{ url_for('admin.manage_students', page=students.next_num, search=search) }}" class="pagination-item">
+                <i class="fas fa-chevron-right"></i>
+            </a>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

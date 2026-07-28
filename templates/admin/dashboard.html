@@ -1,0 +1,231 @@
+{% extends "dashboard.html" %}
+
+{% block title %}Admin Dashboard - KarmixTech LMS{% endblock %}
+
+{% block page_content %}
+<div class="page-header">
+    <div style="display: flex; align-items: center; justify-content: space-between;">
+        <div>
+            <h1 class="page-title">Admin Dashboard</h1>
+            <p class="page-subtitle">Welcome back, {{ current_user.first_name }}! Here's what's happening.</p>
+        </div>
+        <div style="display: flex; gap: 0.5rem;">
+            <a href="{{ url_for('admin.add_course') }}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Add Course
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Stats Grid -->
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-icon primary">
+            <i class="fas fa-users"></i>
+        </div>
+        <div class="stat-content">
+            <h4>{{ stats.total_students }}</h4>
+            <p>Total Students</p>
+            <div class="stat-trend up">
+                <i class="fas fa-arrow-up"></i>
+                <span>{{ stats.new_students_last_30_days }} new this month</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon success">
+            <i class="fas fa-book"></i>
+        </div>
+        <div class="stat-content">
+            <h4>{{ stats.total_courses }}</h4>
+            <p>Total Courses</p>
+            <div class="stat-trend">
+                <i class="fas fa-check-circle"></i>
+                <span>Active courses</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon warning">
+            <i class="fas fa-clipboard-list"></i>
+        </div>
+        <div class="stat-content">
+            <h4>{{ stats.total_enrollments }}</h4>
+            <p>Total Enrollments</p>
+            <div class="stat-trend up">
+                <i class="fas fa-arrow-up"></i>
+                <span>{{ stats.new_enrollments_last_30_days }} new this month</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon info">
+            <i class="fas fa-graduation-cap"></i>
+        </div>
+        <div class="stat-content">
+            <h4>{{ stats.completed_enrollments }}</h4>
+            <p>Completions</p>
+            <div class="stat-trend">
+                <i class="fas fa-certificate"></i>
+                <span>Certificates issued</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem;">
+    <!-- Main Content -->
+    <div>
+        <!-- Popular Courses -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title"><i class="fas fa-fire" style="margin-right: 0.5rem; color: var(--warning-color);"></i> Popular Courses</h3>
+                <a href="{{ url_for('admin.manage_courses') }}" class="btn btn-sm btn-outline">View All</a>
+            </div>
+            <div class="card-body" style="padding: 0;">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Course</th>
+                            <th>Category</th>
+                            <th>Students</th>
+                            <th>Rating</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for course in popular_courses %}
+                        <tr>
+                            <td>
+                                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                                    <img src="{{ course.thumbnail }}" alt="{{ course.title }}"
+                                         style="width: 50px; height: 30px; object-fit: cover; border-radius: var(--radius-sm);">
+                                    <span style="font-weight: 500;">{{ course.title[:30] }}...</span>
+                                </div>
+                            </td>
+                            <td><span class="badge badge-gray">{{ course.category }}</span></td>
+                            <td>{{ course.enrolled_students_count }}</td>
+                            <td>
+                                <div style="display: flex; align-items: center; gap: 0.25rem; color: #f59e0b;">
+                                    <i class="fas fa-star"></i>
+                                    <span>{{ course.average_rating or 'N/A' }}</span>
+                                </div>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="4" style="text-align: center; padding: 2rem; color: var(--gray-500);">
+                                No courses available
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Recent Enrollments -->
+        <div class="card mt-3">
+            <div class="card-header">
+                <h3 class="card-title"><i class="fas fa-user-plus" style="margin-right: 0.5rem;"></i> Recent Enrollments</h3>
+            </div>
+            <div class="card-body" style="padding: 0;">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Student</th>
+                            <th>Course</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for enrollment in recent_enrollments %}
+                        <tr>
+                            <td>
+                                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                    <div class="user-avatar" style="width: 28px; height: 28px; font-size: 0.7rem;">
+                                        {{ enrollment.student.first_name[0] }}{{ enrollment.student.last_name[0] }}
+                                    </div>
+                                    <span>{{ enrollment.student.full_name }}</span>
+                                </div>
+                            </td>
+                            <td>{{ enrollment.course.title[:30] }}...</td>
+                            <td style="color: var(--gray-500);">{{ enrollment.enrolled_at|time_ago }}</td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="3" style="text-align: center; padding: 2rem; color: var(--gray-500);">
+                                No recent enrollments
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div>
+        <!-- Category Distribution -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title"><i class="fas fa-chart-pie" style="margin-right: 0.5rem;"></i> Categories</h3>
+            </div>
+            <div class="card-body">
+                {% for category, count in category_data.items() %}
+                <div style="display: flex; align-items: center; justify-content: space-between; padding: 0.5rem 0; {% if not loop.last %}border-bottom: 1px solid var(--gray-100);{% endif %}">
+                    <span style="font-size: 0.875rem; color: var(--gray-700);">{{ category }}</span>
+                    <span class="badge badge-primary">{{ count }}</span>
+                </div>
+                {% else %}
+                <p style="text-align: center; color: var(--gray-500);">No data available</p>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Recent Students -->
+        <div class="card mt-3">
+            <div class="card-header">
+                <h3 class="card-title"><i class="fas fa-user-clock" style="margin-right: 0.5rem;"></i> New Students</h3>
+                <a href="{{ url_for('admin.manage_students') }}" class="btn btn-sm btn-outline">View All</a>
+            </div>
+            <div class="card-body">
+                {% for student in recent_students %}
+                <div style="display: flex; align-items: center; gap: 0.75rem; padding: 0.5rem 0;">
+                    <div class="user-avatar" style="width: 36px; height: 36px; font-size: 0.75rem;">
+                        {{ student.first_name[0] }}{{ student.last_name[0] }}
+                    </div>
+                    <div style="flex: 1;">
+                        <div style="font-size: 0.875rem; font-weight: 500;">{{ student.full_name }}</div>
+                        <div style="font-size: 0.75rem; color: var(--gray-500);">{{ student.created_at|time_ago }}</div>
+                    </div>
+                </div>
+                {% else %}
+                <p style="text-align: center; color: var(--gray-500);">No recent students</p>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="card mt-3">
+            <div class="card-header">
+                <h3 class="card-title"><i class="fas fa-bolt" style="margin-right: 0.5rem; color: var(--warning-color);"></i> Quick Actions</h3>
+            </div>
+            <div class="card-body" style="display: flex; flex-direction: column; gap: 0.5rem;">
+                <a href="{{ url_for('admin.add_course') }}" class="btn btn-outline btn-sm" style="justify-content: flex-start;">
+                    <i class="fas fa-plus"></i> Add New Course
+                </a>
+                <a href="{{ url_for('admin.manage_students') }}" class="btn btn-outline btn-sm" style="justify-content: flex-start;">
+                    <i class="fas fa-users"></i> Manage Students
+                </a>
+                <a href="{{ url_for('admin.statistics') }}" class="btn btn-outline btn-sm" style="justify-content: flex-start;">
+                    <i class="fas fa-chart-bar"></i> View Statistics
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

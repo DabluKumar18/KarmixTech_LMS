@@ -1,0 +1,136 @@
+{% extends "dashboard.html" %}
+
+{% block title %}{{ course.title }} - Learning{% endblock %}
+
+{% block page_content %}
+<!-- Breadcrumb -->
+<div style="margin-bottom: 1rem; font-size: 0.875rem;">
+    <a href="{{ url_for('student.my_courses') }}" style="color: var(--gray-500);">My Courses</a>
+    <span style="color: var(--gray-400); margin: 0 0.5rem;">/</span>
+    <span style="color: var(--gray-700);">{{ course.title }}</span>
+</div>
+
+<div style="display: grid; grid-template-columns: 300px 1fr; gap: 1.5rem;">
+    <!-- Sidebar - Course Contents -->
+    <div>
+        <div class="card" style="position: sticky; top: 80px;">
+            <div class="card-header">
+                <h3 class="card-title">Course Content</h3>
+            </div>
+            <div class="card-body" style="padding: 0; max-height: calc(100vh - 200px); overflow-y: auto;">
+                {% for module in course.modules.all() %}
+                <details style="border-bottom: 1px solid var(--gray-200);" {% if loop.first %}open{% endif %}>
+                    <summary style="padding: 1rem; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; font-weight: 500; background: var(--gray-50);">
+                        <i class="fas fa-chevron-right" style="font-size: 0.75rem; color: var(--gray-400);"></i>
+                        {{ module.title }}
+                    </summary>
+                    <div style="padding: 0 1rem 1rem;">
+                        {% for lesson in module.lessons.all() %}
+                        <div style="display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem; border-radius: var(--radius); margin-bottom: 0.25rem; cursor: pointer; {% if completed_lessons.get(lesson.id) %}background: rgba(5, 150, 105, 0.1);{% endif %}">
+                            <i class="fas fa-{% if completed_lessons.get(lesson.id) %}check-circle{% else %}play-circle{% endif %}" style="color: {% if completed_lessons.get(lesson.id) %}var(--success-color){% else %}var(--gray-400){% endif %};"></i>
+                            <span style="font-size: 0.875rem; {% if completed_lessons.get(lesson.id) %}color: var(--success-color);{% endif %}">{{ lesson.title }}</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </details>
+                {% else %}
+                <div style="padding: 2rem; text-align: center; color: var(--gray-400);">
+                    <p>No content available yet</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div>
+        <!-- Progress -->
+        <div class="card mb-3">
+            <div class="card-body">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem;">
+                    <span style="font-weight: 600;">Course Progress</span>
+                    <span style="color: var(--gray-500);">{{ enrollment.progress_percentage|round }}%</span>
+                </div>
+                <div class="progress" style="height: 8px;">
+                    <div class="progress-bar course-progress-bar {% if enrollment.is_completed %}success{% endif %}" style="width: {{ enrollment.progress_percentage }}%;"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Course Content Area -->
+        <div class="card">
+            <div style="background: var(--gray-900); aspect-ratio: 16/9; display: flex; align-items: center; justify-content: center; border-radius: var(--radius-lg) var(--radius-lg) 0 0;">
+                <div style="text-align: center; color: var(--white);">
+                    <i class="fas fa-play-circle" style="font-size: 4rem; margin-bottom: 1rem; opacity: 0.7;"></i>
+                    <p style="color: var(--gray-400);">Video content would appear here</p>
+                </div>
+            </div>
+            <div class="card-body">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;">
+                    <div>
+                        <h2 style="font-size: 1.25rem;">{{ course.title }}</h2>
+                        <p style="color: var(--gray-500); font-size: 0.875rem; margin: 0;">Welcome to the course. Click on lessons in the sidebar to begin learning.</p>
+                    </div>
+                    {% if not enrollment.is_completed %}
+                    <button onclick="markLessonComplete({{ course.id }}, 1)" class="btn btn-success">
+                        <i class="fas fa-check"></i> Mark Complete
+                    </button>
+                    {% endif %}
+                </div>
+
+                <div style="background: var(--gray-50); padding: 1.5rem; border-radius: var(--radius);">
+                    <h3 style="font-size: 1rem; margin-bottom: 0.75rem;">About This Course</h3>
+                    <p style="color: var(--gray-600); font-size: 0.9rem; margin: 0; line-height: 1.7;">{{ course.description }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Course Info -->
+        <div class="card mt-3">
+            <div class="card-header">
+                <h3 class="card-title">Course Details</h3>
+            </div>
+            <div class="card-body">
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem;">
+                    <div style="display: flex; align-items: center; gap: 0.75rem;">
+                        <div style="width: 40px; height: 40px; background: rgba(37, 99, 235, 0.1); border-radius: var(--radius); display: flex; align-items: center; justify-content: center;">
+                            <i class="fas fa-clock" style="color: var(--primary-color);"></i>
+                        </div>
+                        <div>
+                            <div style="font-size: 0.75rem; color: var(--gray-400);">Duration</div>
+                            <div style="font-weight: 500;">{{ course.duration_hours }} hours</div>
+                        </div>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 0.75rem;">
+                        <div style="width: 40px; height: 40px; background: rgba(5, 150, 105, 0.1); border-radius: var(--radius); display: flex; align-items: center; justify-content: center;">
+                            <i class="fas fa-signal" style="color: var(--success-color);"></i>
+                        </div>
+                        <div>
+                            <div style="font-size: 0.75rem; color: var(--gray-400);">Level</div>
+                            <div style="font-weight: 500;">{{ course.level }}</div>
+                        </div>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 0.75rem;">
+                        <div style="width: 40px; height: 40px; background: rgba(217, 119, 6, 0.1); border-radius: var(--radius); display: flex; align-items: center; justify-content: center;">
+                            <i class="fas fa-layer-group" style="color: var(--warning-color);"></i>
+                        </div>
+                        <div>
+                            <div style="font-size: 0.75rem; color: var(--gray-400);">Modules</div>
+                            <div style="font-weight: 500;">{{ course.modules_count }}</div>
+                        </div>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 0.75rem;">
+                        <div style="width: 40px; height: 40px; background: rgba(2, 132, 199, 0.1); border-radius: var(--radius); display: flex; align-items: center; justify-content: center;">
+                            <i class="fas fa-certificate" style="color: var(--info-color);"></i>
+                        </div>
+                        <div>
+                            <div style="font-size: 0.75rem; color: var(--gray-400);">Certificate</div>
+                            <div style="font-weight: 500;">{% if enrollment.is_completed %}Earned{% else %}Available{% endif %}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,91 @@
+{% extends "dashboard.html" %}
+
+{% block title %}Notifications - KarmixTech LMS{% endblock %}
+
+{% block page_content %}
+<div class="page-header">
+    <div style="display: flex; align-items: center; justify-content: space-between;">
+        <div>
+            <h1 class="page-title">Notifications</h1>
+            <p class="page-subtitle">Stay updated with your learning activities.</p>
+        </div>
+        <form method="POST" action="{{ url_for('student.mark_all_notifications_read') }}">
+            <button type="submit" class="btn btn-outline">
+                <i class="fas fa-check-double"></i> Mark All Read
+            </button>
+        </form>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body" style="padding: 0;">
+        {% if notifications.items %}
+            {% for notification in notifications.items %}
+            <div class="notification-item" data-notification-id="{{ notification.id }}" style="padding: 1rem 1.25rem; display: flex; align-items: flex-start; gap: 1rem; {% if not loop.last %}border-bottom: 1px solid var(--gray-100);{% endif %} {% if not notification.is_read %}background: var(--gray-50);{% endif %}">
+                <div style="width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+                    {% if notification.notification_type == 'success' %}background: rgba(5, 150, 105, 0.1); color: var(--success-color);
+                    {% elif notification.notification_type == 'warning' %}background: rgba(217, 119, 6, 0.1); color: var(--warning-color);
+                    {% elif notification.notification_type == 'error' %}background: rgba(220, 38, 38, 0.1); color: var(--danger-color);
+                    {% else %}background: rgba(37, 99, 235, 0.1); color: var(--primary-color);{% endif %}">
+                    <i class="fas fa-{% if notification.notification_type == 'success' %}check-circle{% elif notification.notification_type == 'warning' %}exclamation-triangle{% elif notification.notification_type == 'error' %}times-circle{% else %}info-circle{% endif %}"></i>
+                </div>
+                <div style="flex: 1;">
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.25rem;">
+                        <h4 style="font-size: 0.95rem; margin: 0;">{{ notification.title }}</h4>
+                        <span style="font-size: 0.75rem; color: var(--gray-400);">{{ notification.created_at|time_ago }}</span>
+                    </div>
+                    <p style="color: var(--gray-600); font-size: 0.85rem; margin: 0;">{{ notification.message }}</p>
+                    {% if notification.link %}
+                    <a href="{{ notification.link }}" style="font-size: 0.85rem; margin-top: 0.5rem; display: inline-block;">View details</a>
+                    {% endif %}
+                </div>
+                {% if not notification.is_read %}
+                <form method="POST" action="{{ url_for('student.mark_notification_read', notification_id=notification.id) }}" style="display: inline;">
+                    <button type="submit" class="btn btn-sm btn-outline">
+                        <i class="fas fa-check"></i>
+                    </button>
+                </form>
+                {% endif %}
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="empty-state" style="padding: 3rem;">
+                <div class="empty-state-icon">
+                    <i class="fas fa-bell-slash"></i>
+                </div>
+                <h3>No notifications</h3>
+                <p>You're all caught up! Check back later for updates.</p>
+            </div>
+        {% endif %}
+    </div>
+
+    {% if notifications.pages > 1 %}
+    <div class="card-footer" style="display: flex; justify-content: center;">
+        <div class="pagination">
+            {% if notifications.has_prev %}
+            <a href="{{ url_for('student.notifications', page=notifications.prev_num) }}" class="pagination-item">
+                <i class="fas fa-chevron-left"></i>
+            </a>
+            {% endif %}
+
+            {% for page_num in notifications.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
+                {% if page_num %}
+                <a href="{{ url_for('student.notifications', page=page_num) }}"
+                   class="pagination-item {% if page_num == notifications.page %}active{% endif %}">
+                    {{ page_num }}
+                </a>
+                {% else %}
+                <span class="pagination-item disabled">...</span>
+                {% endif %}
+            {% endfor %}
+
+            {% if notifications.has_next %}
+            <a href="{{ url_for('student.notifications', page=notifications.next_num) }}" class="pagination-item">
+                <i class="fas fa-chevron-right"></i>
+            </a>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

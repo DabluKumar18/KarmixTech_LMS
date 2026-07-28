@@ -1,0 +1,110 @@
+{% extends "dashboard.html" %}
+
+{% block title %}Manage Modules - {{ course.title }} - KarmixTech LMS{% endblock %}
+
+{% block page_content %}
+<div class="page-header">
+    <div style="display: flex; align-items: center; gap: 1rem;">
+        <a href="{{ url_for('admin.manage_courses') }}" class="btn btn-outline">
+            <i class="fas fa-arrow-left"></i>
+        </a>
+        <div>
+            <h1 class="page-title">Manage Modules</h1>
+            <p class="page-subtitle">{{ course.title }}</p>
+        </div>
+    </div>
+</div>
+
+<!-- Course Info -->
+<div class="card mb-3">
+    <div class="card-body" style="display: flex; align-items: center; justify-content: space-between;">
+        <div style="display: flex; align-items: center; gap: 1rem;">
+            <img src="{{ course.thumbnail }}" alt="{{ course.title }}"
+                 style="width: 80px; height: 50px; object-fit: cover; border-radius: var(--radius);">
+            <div>
+                <h3 style="font-size: 1rem; margin-bottom: 0.25rem;">{{ course.title }}</h3>
+                <div style="color: var(--gray-500); font-size: 0.85rem;">
+                    <span class="badge badge-gray">{{ course.category }}</span>
+                    <span class="badge badge-primary">{{ course.level }}</span>
+                </div>
+            </div>
+        </div>
+        <a href="{{ url_for('admin_content.add_module', course_id=course.id) }}" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Add Module
+        </a>
+    </div>
+</div>
+
+<!-- Modules List -->
+{% if modules %}
+<div class="card">
+    <div class="card-body" style="padding: 0;">
+        {% for module in modules %}
+        <div style="padding: 1.25rem; {% if not loop.last %}border-bottom: 1px solid var(--gray-200);{% endif %} display: flex; align-items: center; gap: 1rem;">
+            <div style="width: 40px; height: 40px; background: var(--primary-color); color: var(--white); border-radius: var(--radius); display: flex; align-items: center; justify-content: center; font-weight: 600;">
+                {{ module.order }}
+            </div>
+
+            <div style="flex: 1;">
+                <h4 style="font-size: 1rem; margin-bottom: 0.25rem;">
+                    <a href="{{ url_for('admin_content.manage_lessons', module_id=module.id) }}" style="color: var(--gray-900);">
+                        {{ module.title }}
+                    </a>
+                </h4>
+                <p style="color: var(--gray-500); font-size: 0.85rem; margin: 0;">
+                    {{ module.description[:100] if module.description else 'No description' }}
+                </p>
+                <div style="display: flex; gap: 1rem; margin-top: 0.5rem; font-size: 0.8rem; color: var(--gray-500);">
+                    <span><i class="fas fa-book"></i> {{ module.lessons_count }} lessons</span>
+                    <span><i class="fas fa-clock"></i> {{ module.total_duration_minutes }} min</span>
+                    {% if module.is_preview %}
+                    <span class="badge badge-success">Preview</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                <form method="POST" action="{{ url_for('admin_content.reorder_module', module_id=module.id) }}" style="display: flex; gap: 0.25rem;">
+                    <input type="hidden" name="direction" value="up">
+                    <button type="submit" class="btn btn-sm btn-outline" title="Move Up">
+                        <i class="fas fa-chevron-up"></i>
+                    </button>
+                </form>
+                <form method="POST" action="{{ url_for('admin_content.reorder_module', module_id=module.id) }}" style="display: flex; gap: 0.25rem;">
+                    <input type="hidden" name="direction" value="down">
+                    <button type="submit" class="btn btn-sm btn-outline" title="Move Down">
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                </form>
+            </div>
+
+            <div style="display: flex; gap: 0.5rem;">
+                <a href="{{ url_for('admin_content.manage_lessons', module_id=module.id) }}" class="btn btn-sm btn-primary" title="Manage Lessons">
+                    <i class="fas fa-book"></i>
+                </a>
+                <a href="{{ url_for('admin_content.edit_module', module_id=module.id) }}" class="btn btn-sm btn-outline" title="Edit">
+                    <i class="fas fa-edit"></i>
+                </a>
+                <form method="POST" action="{{ url_for('admin_content.delete_module', module_id=module.id) }}" onsubmit="return confirm('Are you sure? This will delete all lessons in this module.');" style="display: inline;">
+                    <button type="submit" class="btn btn-sm btn-danger" title="Delete">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% else %}
+<div class="empty-state" style="background: var(--white); padding: 4rem; border-radius: var(--radius-lg);">
+    <div class="empty-state-icon">
+        <i class="fas fa-layer-group"></i>
+    </div>
+    <h3>No modules yet</h3>
+    <p>Create modules to organize your course content.</p>
+    <a href="{{ url_for('admin_content.add_module', course_id=course.id) }}" class="btn btn-primary">
+        <i class="fas fa-plus"></i> Add First Module
+    </a>
+</div>
+{% endif %}
+{% endblock %}

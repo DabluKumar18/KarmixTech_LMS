@@ -1,0 +1,199 @@
+{% extends "dashboard.html" %}
+
+{% block title %}{% if lesson %}Edit Lesson{% else %}Add Lesson{% endif %} - KarmixTech LMS{% endblock %}
+
+{% block page_content %}
+<div class="page-header">
+    <div style="display: flex; align-items: center; gap: 1rem;">
+        <a href="{{ url_for('admin_content.manage_lessons', module_id=module.id) }}" class="btn btn-outline">
+            <i class="fas fa-arrow-left"></i>
+        </a>
+        <div>
+            <h1 class="page-title">{% if lesson %}Edit Lesson{% else %}Add Lesson{% endif %}</h1>
+            <p class="page-subtitle">{{ module.title }} ({{ course.title }})</p>
+        </div>
+    </div>
+</div>
+
+<div style="display: grid; grid-template-columns: 2fr 1fr; gap: 2rem;">
+    <!-- Main Form -->
+    <div class="card">
+        <form method="POST">
+            <div class="card-body">
+                <h3 style="margin-bottom: 1.5rem;">Lesson Content</h3>
+
+                <div class="form-group">
+                    <label class="form-label">Lesson Title *</label>
+                    <input type="text" name="title" class="form-control" required
+                           value="{{ lesson.title if lesson else '' }}"
+                           placeholder="e.g., Introduction to Variables">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Description</label>
+                    <textarea name="description" class="form-control" rows="2"
+                              placeholder="Brief description of what students will learn...">{{ lesson.description if lesson else '' }}</textarea>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Detailed Content (Optional)</label>
+                    <textarea name="content" class="form-control" rows="4"
+                              placeholder="Additional lesson content, instructions, or notes...">{{ lesson.content if lesson else '' }}</textarea>
+                </div>
+
+                <div style="border-top: 1px solid var(--gray-200); margin: 1.5rem 0; padding-top: 1.5rem;">
+                    <h3 style="margin-bottom: 1.5rem;">Video Content</h3>
+
+                    <div class="form-group">
+                        <label class="form-label">YouTube Video URL</label>
+                        <input type="text" name="video_url" class="form-control"
+                               value="{{ lesson.video_url if lesson else '' }}"
+                               placeholder="https://www.youtube.com/watch?v=VIDEO_ID"
+                               id="videoUrlInput">
+                        <div class="form-text">
+                            <i class="fas fa-info-circle"></i> Supported formats: youtube.com/watch?v=, youtu.be/, youtube.com/embed/
+                        </div>
+                        {% if lesson and lesson.youtube_video_id %}
+                        <div class="alert alert-info mt-2" style="margin-bottom: 0;">
+                            <i class="fab fa-youtube" style="color: var(--danger-color);"></i> Video ID: <strong>{{ lesson.youtube_video_id }}</strong>
+                            <a href="https://www.youtube.com/watch?v={{ lesson.youtube_video_id }}" target="_blank" style="margin-left: 0.5rem;">
+                                <i class="fas fa-external-link-alt"></i> Preview
+                            </a>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Duration (minutes)</label>
+                        <input type="number" name="duration_minutes" class="form-control" min="0" step="1"
+                               value="{{ lesson.duration_minutes if lesson else 0 }}">
+                        <div class="form-text">Enter the total duration for progress tracking.</div>
+                    </div>
+                </div>
+
+                <div style="border-top: 1px solid var(--gray-200); margin: 1.5rem 0; padding-top: 1.5rem;">
+                    <h3 style="margin-bottom: 1.5rem;">PDF Notes (Optional)</h3>
+
+                    <div class="form-group">
+                        <label class="form-label">PDF Notes URL</label>
+                        <input type="text" name="pdf_url" class="form-control"
+                               value="{{ lesson.pdf_url if lesson else '' }}"
+                               placeholder="https://example.com/path/to/notes.pdf">
+                        <div class="form-text">Direct link to the downloadable PDF file.</div>
+                    </div>
+                </div>
+
+                <div style="border-top: 1px solid var(--gray-200); margin: 1.5rem 0; padding-top: 1.5rem;">
+                    <h3 style="margin-bottom: 1.5rem;">Settings</h3>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div class="form-group">
+                            <label class="form-label">Order</label>
+                            <input type="number" name="order" class="form-control" min="1" step="1"
+                                   value="{{ lesson.order if lesson else '' }}"
+                                   placeholder="Auto-assigned">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">&nbsp;</label>
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" id="is_preview" name="is_preview"
+                                       {% if lesson and lesson.is_preview %}checked{% endif %}>
+                                <label class="form-check-label" for="is_preview">Free Preview</label>
+                            </div>
+                            <div class="form-check" style="margin-top: 0.5rem;">
+                                <input type="checkbox" class="form-check-input" id="is_published" name="is_published"
+                                       {% if not lesson or lesson.is_published %}checked{% endif %}>
+                                <label class="form-check-label" for="is_published">Published</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-footer" style="display: flex; justify-content: space-between;">
+                <a href="{{ url_for('admin_content.manage_lessons', module_id=module.id) }}" class="btn btn-outline">Cancel</a>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save"></i> {% if lesson %}Update Lesson{% else %}Create Lesson{% endif %}
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Sidebar -->
+    <div>
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title"><i class="fas fa-lightbulb" style="margin-right: 0.5rem; color: var(--warning-color);"></i> Tips</h3>
+            </div>
+            <div class="card-body" style="font-size: 0.85rem; color: var(--gray-600);">
+                <p><strong>YouTube Videos:</strong> You can paste any YouTube URL and we'll automatically extract the video ID.</p>
+                <p><strong>PDF Notes:</strong> Upload your PDF to a file hosting service and paste the direct link.</p>
+                <p><strong>Preview:</strong> Marking a lesson as "Free Preview" allows unenrolled students to view it.</p>
+                <p><strong>Order:</strong> Lessons are displayed in ascending order. Lower numbers appear first.</p>
+            </div>
+        </div>
+
+        <div class="card mt-3">
+            <div class="card-header">
+                <h3 class="card-title"><i class="fas fa-link" style="margin-right: 0.5rem;"></i> Quick Links</h3>
+            </div>
+            <div class="card-body" style="font-size: 0.75rem;">
+                <p style="color: var(--gray-500); margin-bottom: 0.5rem;">Sample YouTube URLs:</p>
+                <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                    <button type="button" class="btn btn-outline btn-sm" style="justify-content: flex-start; font-size: 0.7rem;">
+                        youtube.com/watch?v=dQw4w9WgXcQ
+                    </button>
+                    <button type="button" class="btn btn-outline btn-sm" style="justify-content: flex-start; font-size: 0.7rem;">
+                        youtu.be/dQw4w9WgXcQ
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mt-3">
+            <div class="card-header">
+                <h3 class="card-title"><i class="fas fa-info-circle" style="margin-right: 0.5rem;"></i> Module Info</h3>
+            </div>
+            <div class="card-body" style="font-size: 0.85rem;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                    <span style="color: var(--gray-500);">Module</span>
+                    <span>{{ module.title }}</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                    <span style="color: var(--gray-500);">Course</span>
+                    <span>{{ course.title[:20] }}...</span>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                    <span style="color: var(--gray-500);">Lessons</span>
+                    <span>{{ module.lessons_count }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Preview video URL
+document.getElementById('videoUrlInput').addEventListener('blur', function() {
+    const url = this.value.trim();
+    if (!url) return;
+
+    // Extract video ID for preview
+    const patterns = [
+        /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\n?#]+)/,
+        /^([a-zA-Z0-9_-]{11})$/
+    ];
+
+    for (const pattern of patterns) {
+        const match = url.match(pattern);
+        if (match) {
+            console.log('Video ID:', match[1]);
+            break;
+        }
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% block title %}About - KarmixTech LMS{% endblock %}
+
+{% block body_class %}landing-layout{% endblock %}
+
+{% block content %}
+<!-- Header -->
+<header class="landing-header">
+    <div class="container">
+        <a href="{{ url_for('index') }}" class="sidebar-logo">
+            <div class="sidebar-logo-icon">
+                <i class="fas fa-graduation-cap"></i>
+            </div>
+            <span style="color: var(--gray-900);">KarmixTech</span>
+        </a>
+        <nav style="display: flex; align-items: center; gap: 1rem;">
+            <a href="{{ url_for('auth.register') }}" class="btn btn-outline">Register</a>
+            <a href="{{ url_for('auth.login') }}" class="btn btn-primary">Login</a>
+        </nav>
+    </div>
+</header>
+
+<main class="landing-main">
+    <!-- Hero -->
+    <section style="background: linear-gradient(135deg, var(--gray-900) 0%, var(--gray-800) 100%); color: var(--white); padding: 5rem 0; text-align: center;">
+        <div class="container">
+            <h1 style="font-size: 2.5rem; margin-bottom: 1rem;">About KarmixTech LMS</h1>
+            <p style="max-width: 600px; margin: 0 auto; color: var(--gray-400);">
+                Empowering learners worldwide with accessible, high-quality education.
+            </p>
+        </div>
+    </section>
+
+    <!-- Mission -->
+    <section style="padding: 4rem 0;">
+        <div class="container">
+            <div style="max-width: 800px; margin: 0 auto; text-align: center;">
+                <h2 style="margin-bottom: 1.5rem;">Our Mission</h2>
+                <p style="font-size: 1.1rem; line-height: 1.8; color: var(--gray-600);">
+                    At KarmixTech LMS, we believe that education should be accessible to everyone, everywhere.
+                    Our platform connects passionate instructors with eager students, creating a global learning
+                    community that transcends borders and breaks down barriers.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats -->
+    <section style="padding: 4rem 0; background: var(--gray-50);">
+        <div class="container">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 2rem; text-align: center;">
+                <div>
+                    <div style="font-size: 2.5rem; font-weight: 700; color: var(--primary-color);">10K+</div>
+                    <div style="color: var(--gray-500);">Students</div>
+                </div>
+                <div>
+                    <div style="font-size: 2.5rem; font-weight: 700; color: var(--primary-color);">500+</div>
+                    <div style="color: var(--gray-500);">Courses</div>
+                </div>
+                <div>
+                    <div style="font-size: 2.5rem; font-weight: 700; color: var(--primary-color);">100+</div>
+                    <div style="color: var(--gray-500);">Instructors</div>
+                </div>
+                <div>
+                    <div style="font-size: 2.5rem; font-weight: 700; color: var(--primary-color);">95%</div>
+                    <div style="color: var(--gray-500);">Satisfaction</div>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+
+<footer class="landing-footer">
+    <div class="container" style="text-align: center;">
+        <p>&copy; {{ current_year }} KarmixTech LMS. All rights reserved.</p>
+    </div>
+</footer>
+{% endblock %}

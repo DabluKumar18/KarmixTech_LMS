@@ -1,0 +1,129 @@
+{% extends "dashboard.html" %}
+
+{% block title %}Certificate - {{ course.title }}{% endblock %}
+
+{% block page_content %}
+<div class="page-header" style="text-align: center; margin-bottom: 2rem;">
+    <h1 class="page-title">Certificate of Completion</h1>
+    <p class="page-subtitle">Congratulations on completing {{ course.title }}!</p>
+</div>
+
+<div style="max-width: 900px; margin: 0 auto;">
+    <!-- Certificate -->
+    <div id="certificate" style="background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); padding: 3rem; border-radius: var(--radius-xl); border: 2px solid var(--primary-color); position: relative; overflow: hidden;">
+        <!-- Background Pattern -->
+        <div style="position: absolute; inset: 0; background: url('data:image/svg+xml,%3Csvg width=\"60\" height=\"60\" viewBox=\"0 0 60 60\" xmlns=\"http://www.w3.org/2000/svg\"%3E%3Cg fill=\"none\" fill-rule=\"evenodd\"%3E%3Cg fill=\"%232563eb\" fill-opacity=\"0.03\"%3E%3Cpath d=\"M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E'); opacity: 0.5;"></div>
+
+        <!-- Content -->
+        <div style="position: relative; z-index: 1; text-align: center;">
+            <!-- Logo -->
+            <div style="margin-bottom: 2rem;">
+                <div style="display: inline-flex; align-items: center; gap: 0.75rem;">
+                    <div style="width: 50px; height: 50px; background: linear-gradient(135deg, var(--primary-color), var(--accent-color)); border-radius: var(--radius); display: flex; align-items: center; justify-content: center;">
+                        <i class="fas fa-graduation-cap" style="color: var(--white); font-size: 1.5rem;"></i>
+                    </div>
+                    <div>
+                        <div style="font-size: 1.5rem; font-weight: 700; color: var(--gray-800);">KarmixTech</div>
+                        <div style="font-size: 0.75rem; color: var(--gray-500);">LEARNING MANAGEMENT SYSTEM</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Certificate Title -->
+            <div style="margin-bottom: 2rem;">
+                <div style="font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.3em; color: var(--gray-500); margin-bottom: 0.5rem;">This is to certify that</div>
+                <h2 style="font-size: 2rem; font-weight: 700; color: var(--gray-800); margin: 0;">{{ current_user.full_name }}</h2>
+            </div>
+
+            <!-- Course Completion -->
+            <div style="margin-bottom: 2rem;">
+                <div style="font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.3em; color: var(--gray-500); margin-bottom: 0.5rem;">has successfully completed the course</div>
+                <h3 style="font-size: 1.75rem; font-weight: 600; color: var(--primary-color); margin: 0;">{{ course.title }}</h3>
+            </div>
+
+            <!-- Course Details -->
+            <div style="display: flex; justify-content: center; gap: 3rem; margin-bottom: 3rem; font-size: 0.9rem; color: var(--gray-600);">
+                <div>
+                    <div style="font-weight: 600; color: var(--gray-800);">{{ course.duration_hours }} Hours</div>
+                    <div style="font-size: 0.75rem; color: var(--gray-500);">Total Duration</div>
+                </div>
+                <div>
+                    <div style="font-weight: 600; color: var(--gray-800);">{{ course.level }}</div>
+                    <div style="font-size: 0.75rem; color: var(--gray-500);">Difficulty Level</div>
+                </div>
+                <div>
+                    <div style="font-weight: 600; color: var(--gray-800);">{{ enrollment.completed_at|date_format if enrollment.completed_at else 'N/A' }}</div>
+                    <div style="font-size: 0.75rem; color: var(--gray-500);">Completion Date</div>
+                </div>
+            </div>
+
+            <!-- Instructor -->
+            <div style="margin-bottom: 3rem;">
+                <div style="font-size: 0.85rem; color: var(--gray-500); margin-bottom: 0.5rem;">Instructor</div>
+                <div style="font-size: 1.1rem; font-weight: 500; color: var(--gray-700);">{{ course.instructor or 'KarmixTech Academy' }}</div>
+            </div>
+
+            <!-- Footer -->
+            <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+                <div style="text-align: left;">
+                    <div style="border-top: 2px solid var(--gray-300); width: 150px; padding-top: 0.5rem;">
+                        <div style="font-size: 0.85rem; font-weight: 500; color: var(--gray-700);">Student ID</div>
+                        <div style="font-size: 0.75rem; color: var(--gray-500);">{{ current_user.id }}</div>
+                    </div>
+                </div>
+
+                <div style="text-align: center;">
+                    <div style="width: 80px; height: 80px; border: 2px solid var(--primary-color); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 0.5rem;">
+                        <i class="fas fa-certificate" style="font-size: 2rem; color: var(--warning-color);"></i>
+                    </div>
+                    <div style="font-size: 0.75rem; color: var(--gray-500);">Certificate Verified</div>
+                </div>
+
+                <div style="text-align: right;">
+                    <div style="border-top: 2px solid var(--gray-300); width: 150px; padding-top: 0.5rem; margin-left: auto;">
+                        <div style="font-size: 0.85rem; font-weight: 500; color: var(--gray-700);">Certificate ID</div>
+                        <div style="font-size: 0.75rem; color: var(--gray-500);">CERT-{{ course.id }}-{{ current_user.id }}-{{ enrollment.completed_at|date_format('%Y%m%d') if enrollment.completed_at else 'N/A' }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Gold Accent -->
+        <div style="position: absolute; top: 0; left: 0; right: 0; height: 5px; background: linear-gradient(90deg, #f59e0b, #fbbf24, #f59e0b);"></div>
+        <div style="position: absolute; bottom: 0; left: 0; right: 0; height: 5px; background: linear-gradient(90deg, #f59e0b, #fbbf24, #f59e0b);"></div>
+    </div>
+
+    <!-- Actions -->
+    <div style="display: flex; justify-content: center; gap: 1rem; margin-top: 2rem;">
+        <button onclick="window.print()" class="btn btn-primary btn-lg">
+            <i class="fas fa-print"></i> Print Certificate
+        </button>
+        <a href="{{ url_for('student.my_courses') }}" class="btn btn-outline btn-lg">
+            <i class="fas fa-arrow-left"></i> Back to My Courses
+        </a>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+@media print {
+    .sidebar, .top-header, .page-header, #actions, .btn {
+        display: none !important;
+    }
+
+    .main-content {
+        margin-left: 0 !important;
+    }
+
+    .page-content {
+        padding: 0 !important;
+    }
+
+    #certificate {
+        box-shadow: none !important;
+        border: 2px solid #000 !important;
+    }
+}
+</style>
+{% endblock %}

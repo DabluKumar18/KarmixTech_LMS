@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+
+{% block title %}Register - KarmixTech LMS{% endblock %}
+
+{% block body_class %}landing-layout{% endblock %}
+
+{% block content %}
+<!-- Header -->
+<header class="landing-header">
+    <div class="container">
+        <a href="{{ url_for('index') }}" class="sidebar-logo">
+            <div class="sidebar-logo-icon">
+                <i class="fas fa-graduation-cap"></i>
+            </div>
+            <span style="color: var(--gray-900);">KarmixTech</span>
+        </a>
+
+        <nav style="display: flex; align-items: center; gap: 1rem;">
+            <span style="color: var(--gray-500);">Already have an account?</span>
+            <a href="{{ url_for('auth.login') }}" class="btn btn-primary">Login</a>
+        </nav>
+    </div>
+</header>
+
+<!-- Register Form -->
+<main class="landing-main">
+    <div style="display: flex; align-items: center; justify-content: center; min-height: calc(100vh - 64px); padding: 2rem;">
+        <div style="width: 100%; max-width: 450px;">
+            <div class="card">
+                <div class="card-body" style="padding: 2rem;">
+                    <div style="text-align: center; margin-bottom: 1.5rem;">
+                        <h2 style="margin-bottom: 0.5rem;">Create Account</h2>
+                        <p style="color: var(--gray-500);">Join KarmixTech LMS and start learning today</p>
+                    </div>
+
+                    <form method="POST" action="{{ url_for('auth.register') }}" data-validate>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                            <div class="form-group">
+                                <label class="form-label">First Name *</label>
+                                <input type="text" name="first_name" class="form-control"
+                                       value="{{ first_name or '' }}" required
+                                       placeholder="Enter first name">
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Last Name *</label>
+                                <input type="text" name="last_name" class="form-control"
+                                       value="{{ last_name or '' }}" required
+                                       placeholder="Enter last name">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Email Address *</label>
+                            <input type="email" name="email" class="form-control"
+                                   value="{{ email or '' }}" required
+                                   placeholder="Enter your email">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Password *</label>
+                            <input type="password" name="password" class="form-control"
+                                   required data-min-length="8"
+                                   placeholder="Create a password">
+                            <div class="form-text">Must be at least 8 characters with uppercase, lowercase, and number</div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Confirm Password *</label>
+                            <input type="password" name="confirm_password" class="form-control"
+                                   required placeholder="Confirm your password">
+                        </div>
+
+                        <div class="form-group">
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" id="terms" required>
+                                <label class="form-check-label" for="terms">
+                                    I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>
+                                </label>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-block btn-lg">
+                            <i class="fas fa-user-plus"></i> Create Account
+                        </button>
+                    </form>
+
+                    <div style="text-align: center; margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--gray-200);">
+                        <p style="color: var(--gray-500); font-size: 0.875rem;">
+                            Already have an account? <a href="{{ url_for('auth.login') }}">Sign in</a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+{% endblock %}

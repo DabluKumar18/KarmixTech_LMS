@@ -1,0 +1,127 @@
+{% extends "dashboard.html" %}
+
+{% block title %}Manage Enrollments - KarmixTech LMS{% endblock %}
+
+{% block page_content %}
+<div class="page-header">
+    <h1 class="page-title">Manage Enrollments</h1>
+    <p class="page-subtitle">Track and manage all course enrollments on the platform.</p>
+</div>
+
+<!-- Filter -->
+<div class="card mb-3">
+    <div class="card-body" style="padding: 1rem;">
+        <form method="GET" style="display: flex; gap: 1rem; align-items: center;">
+            <div style="min-width: 200px;">
+                <select name="course" class="form-control">
+                    <option value="">All Courses</option>
+                    {% for course in courses %}
+                    <option value="{{ course.id }}" {% if course_filter == course.id %}selected{% endif %}>{{ course.title }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary">Filter</button>
+            <a href="{{ url_for('admin.manage_enrollments') }}" class="btn btn-outline">Clear</a>
+        </form>
+    </div>
+</div>
+
+<!-- Enrollments Table -->
+<div class="card">
+    <div class="table-container">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Student</th>
+                    <th>Course</th>
+                    <th>Enrolled</th>
+                    <th>Progress</th>
+                    <th>Status</th>
+                    <th>Last Accessed</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for enrollment in enrollments.items %}
+                <tr>
+                    <td>
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <div class="user-avatar" style="width: 32px; height: 32px; font-size: 0.75rem;">
+                                {{ enrollment.student.first_name[0] }}{{ enrollment.student.last_name[0] }}
+                            </div>
+                            <div>
+                                <div style="font-weight: 500;">{{ enrollment.student.full_name }}</div>
+                                <div style="font-size: 0.75rem; color: var(--gray-400);">{{ enrollment.student.email }}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <div>
+                            <div style="font-weight: 500;">{{ enrollment.course.title[:35] }}...</div>
+                            <div style="font-size: 0.75rem; color: var(--gray-400);">{{ enrollment.course.category }}</div>
+                        </div>
+                    </td>
+                    <td style="color: var(--gray-500);">{{ enrollment.enrolled_at|date_format }}</td>
+                    <td>
+                        <div style="display: flex; flex-direction: column; gap: 0.25rem;">
+                            <div class="progress" style="height: 6px; width: 100px;">
+                                <div class="progress-bar {% if enrollment.is_completed %}success{% endif %}" style="width: {{ enrollment.progress_percentage }}%;"></div>
+                            </div>
+                            <span style="font-size: 0.75rem; color: var(--gray-500);">{{ enrollment.progress_percentage|round }}%</span>
+                        </div>
+                    </td>
+                    <td>
+                        {% if enrollment.is_completed %}
+                        <span class="badge badge-success">Completed</span>
+                        {% else %}
+                        <span class="badge badge-warning">In Progress</span>
+                        {% endif %}
+                    </td>
+                    <td style="color: var(--gray-500);">{{ enrollment.last_accessed|time_ago if enrollment.last_accessed else 'Never' }}</td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="6" style="text-align: center; padding: 3rem;">
+                        <div class="empty-state">
+                            <div class="empty-state-icon">
+                                <i class="fas fa-clipboard-list"></i>
+                            </div>
+                            <h3>No enrollments found</h3>
+                            <p>No enrollments match your criteria.</p>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% if enrollments.pages > 1 %}
+    <div class="card-footer" style="display: flex; justify-content: center;">
+        <div class="pagination">
+            {% if enrollments.has_prev %}
+            <a href="{{ url_for('admin.manage_enrollments', page=enrollments.prev_num, course=course_filter) }}" class="pagination-item">
+                <i class="fas fa-chevron-left"></i>
+            </a>
+            {% endif %}
+
+            {% for page_num in enrollments.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
+                {% if page_num %}
+                <a href="{{ url_for('admin.manage_enrollments', page=page_num, course=course_filter) }}"
+                   class="pagination-item {% if page_num == enrollments.page %}active{% endif %}">
+                    {{ page_num }}
+                </a>
+                {% else %}
+                <span class="pagination-item disabled">...</span>
+                {% endif %}
+            {% endfor %}
+
+            {% if enrollments.has_next %}
+            <a href="{{ url_for('admin.manage_enrollments', page=enrollments.next_num, course=course_filter) }}" class="pagination-item">
+                <i class="fas fa-chevron-right"></i>
+            </a>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
