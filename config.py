@@ -12,7 +12,14 @@ class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY', 'karmixtech-lms-secret-key-2024')
 
     # MySQL Connection
-    SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://root:123456789@localhost/lms_db'
+    MYSQL_HOST = os.getenv("MYSQL_HOST", "localhost")
+    MYSQL_USER = os.getenv("MYSQL_USER", "root")
+    MYSQL_PASSWORD = os.getenv("MYSQL_PASSWORD", "")
+    MYSQL_DATABASE = os.getenv("MYSQL_DATABASE", "lms_db")
+
+    SQLALCHEMY_DATABASE_URI = (
+    f"mysql+pymysql://{MYSQL_USER}:{MYSQL_PASSWORD}@{MYSQL_HOST}/{MYSQL_DATABASE}"
+)
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     SQLALCHEMY_ENGINE_OPTIONS = {

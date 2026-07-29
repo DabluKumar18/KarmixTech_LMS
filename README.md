@@ -1,6 +1,6 @@
 # KarmixTech LMS
 
-![KarmixTech LMS Banner](https://images.pexels.com/photos/5905485/pexels-photo-5905485.jpeg?auto=compress&cs=tinysrgb&w=1200)
+![KarmixTech LMS Banner](screenshots/banner.png)
 
 A professional Full Stack Learning Management System (LMS) built with Python Flask and MySQL. The platform provides a complete learning environment where students can register, enroll in courses, watch video lectures, access PDF study materials, track learning progress, and receive certificates upon course completion. Administrators can efficiently manage courses, modules, lessons, enrollments, and students through a secure admin dashboard.
 
@@ -179,18 +179,25 @@ KarmixTech_LMS/
 ### Step 1: Clone the Repository
 
 ```bash
-git clone https://github.com/DabluKumar18/KarmixTech_LMS.git cd KarmixTech_LMS
+git clone https://github.com/DabluKumar18/KarmixTech_LMS.git
+cd KarmixTech_LMS
 ```
 
-### Step 2: Create Virtual Environment
+### Step 2: Create a Virtual Environment
 
 ```bash
 python -m venv venv
+```
 
-# Windows
+**Windows**
+
+```bash
 venv\Scripts\activate
+```
 
-# Linux/macOS
+**Linux/macOS**
+
+```bash
 source venv/bin/activate
 ```
 
@@ -202,239 +209,172 @@ pip install -r requirements.txt
 
 ### Step 4: Configure Environment Variables
 
-Create a .env file in the project root and add your MySQL configuration.
+Create a `.env` file in the project root and add the following configuration:
 
 ```env
 SECRET_KEY=your-secret-key-here
 
-MYSQL_HOST=localhost 
-MYSQL_USER=root 
-MYSQL_PASSWORD=your_mysql_password 
-MYSQL_DATABASE=lms_db 
+MYSQL_HOST=localhost
+MYSQL_USER=root
+MYSQL_PASSWORD=your_mysql_password
+MYSQL_DATABASE=lms_db
 
 FLASK_ENV=development
 ```
 
-### Step 5: Create MySQL Database
-CREATE DATABASE lms_db;
+### Step 5: Create the Database
 
-### Step 6: Initialize Database
+```sql
+CREATE DATABASE lms_db;
+```
+
+### Step 6: Initialize the Database
 
 ```bash
 python init_db.py
 ```
 
-The application will automatically create tables and seed initial data.
+This command automatically creates all required database tables and inserts the initial sample data.
 
 ### Step 7: Run the Application
 
 ```bash
-python run.py
+python app.py
 ```
 
-Open your browser and navigate to: `http://localhost:5000`
+Open your browser and visit:
+
+```
+http://127.0.0.1:5000
+```
 
 ## Database Setup
 
-### Database Schema
+This project uses **MySQL** as the database.
+
+### 1. Create the Database
 
 ```sql
-TABLE users (
-    id                  SERIAL PRIMARY KEY,
-    email               VARCHAR(120) UNIQUE NOT NULL,
-    password_hash       VARCHAR(256) NOT NULL,
-    first_name          VARCHAR(50) NOT NULL,
-    last_name           VARCHAR(50) NOT NULL,
-    role                VARCHAR(20) DEFAULT 'student',
-    is_active           BOOLEAN DEFAULT TRUE,
-    email_verified      BOOLEAN DEFAULT FALSE,
-    profile_image       VARCHAR(255),
-    phone               VARCHAR(20),
-    bio                 TEXT,
-    city                VARCHAR(100),
-    country             VARCHAR(100),
-    created_at          TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at          TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    last_login          TIMESTAMP
-);
-
-TABLE courses (
-    id                  SERIAL PRIMARY KEY,
-    title               VARCHAR(200) NOT NULL,
-    slug                VARCHAR(250) UNIQUE NOT NULL,
-    description         TEXT NOT NULL,
-    category            VARCHAR(50) NOT NULL,
-    level               VARCHAR(20) DEFAULT 'Beginner',
-    duration_hours      INTEGER DEFAULT 0,
-    price               FLOAT DEFAULT 0,
-    is_free             BOOLEAN DEFAULT TRUE,
-    is_published        BOOLEAN DEFAULT TRUE,
-    thumbnail           VARCHAR(255),
-    instructor          VARCHAR(100),
-    language            VARCHAR(20) DEFAULT 'English',
-    created_by          INTEGER REFERENCES users(id),
-    created_at          TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
-TABLE enrollments (
-    id                  SERIAL PRIMARY KEY,
-    user_id              INTEGER REFERENCES users(id) NOT NULL,
-    course_id            INTEGER REFERENCES courses(id) NOT NULL,
-    enrolled_at         TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    completed_at        TIMESTAMP,
-    is_completed        BOOLEAN DEFAULT FALSE,
-    progress_percentage FLOAT DEFAULT 0,
-    last_accessed       TIMESTAMP,
-    UNIQUE(user_id, course_id)
-);
-
-TABLE progress (
-    id                  SERIAL PRIMARY KEY,
-    user_id             INTEGER REFERENCES users(id) NOT NULL,
-    course_id           INTEGER REFERENCES courses(id) NOT NULL,
-    lesson_id           INTEGER REFERENCES lessons(id),
-    is_completed        BOOLEAN DEFAULT FALSE,
-    time_spent_minutes  INTEGER DEFAULT 0,
-    completed_at        TIMESTAMP,
-    UNIQUE(user_id, lesson_id)
-);
-
-TABLE notifications (
-    id                  SERIAL PRIMARY KEY,
-    user_id             INTEGER REFERENCES users(id) NOT NULL,
-    title               VARCHAR(200) NOT NULL,
-    message             TEXT NOT NULL,
-    notification_type   VARCHAR(50) DEFAULT 'info',
-    link                VARCHAR(255),
-    is_read             BOOLEAN DEFAULT FALSE,
-    created_at          TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
+CREATE DATABASE lms_db;
 ```
+
+### 2. Import the Database
+
+Import the provided database backup:
+
+```bash
+mysql -u root -p lms_db < Karmix_db.sql
+```
+The `Karmix_db.sql` file contains the complete database schema along with sample data required to run the project.
+
 
 ## Configuration
 
-### Application Config
+Configure your application by creating a `.env` file in the project root.
 
-The application uses environment-based configuration:
+```env
+SECRET_KEY=your-secret-key-here
 
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `SECRET_KEY` | Flask secret key | 'karmixtech-lms-secret-key-2024' |
-| `SUPABASE_DB_URL` | PostgreSQL connection string | Required |
-| `FLASK_ENV` | Environment mode | 'development' |
-| `ITEMS_PER_PAGE` | Pagination limit | 10 |
+MYSQL_HOST=localhost
+MYSQL_USER=root
+MYSQL_PASSWORD=your_mysql_password
+MYSQL_DATABASE=lms_db
+
+FLASK_ENV=development
+```
 
 ### Security Settings
 
 - Session cookie HTTPOnly: Enabled
 - Session lifetime: 24 hours
-- Password hashing: werkzeug.security (pbkdf2:sha256)
+- Password hashing using `werkzeug.security`
 
 ## API Documentation
 
 ### Base URL
+
 ```
 http://localhost:5000/api
 ```
 
-### Authentication Endpoints
+### Authentication APIs
 
-#### POST /api/users/register
-Register a new user.
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/users/register` | Register a new user |
+| POST | `/api/users/login` | Login a user |
 
-**Request Body:**
+**Sample Registration Request**
+
 ```json
 {
-    "email": "student@example.com",
-    "password": "Password123",
-    "first_name": "John",
-    "last_name": "Doe"
+  "email": "student@example.com",
+  "password": "Password123",
+  "first_name": "John",
+  "last_name": "Doe"
 }
 ```
 
-**Response:**
-```json
-{
-    "message": "Registration successful",
-    "user": { ... }
-}
-```
+---
 
-#### POST /api/users/login
-Login user.
+### Course APIs
 
-**Request Body:**
-```json
-{
-    "email": "student@example.com",
-    "password": "Password123"
-}
-```
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/courses` | Get all available courses |
+| GET | `/api/courses/:id` | Get course details |
 
-### Course Endpoints
+**Query Parameters**
 
-#### GET /api/courses
-Get all courses with filters.
+- `search`
+- `category`
+- `level`
+- `page`
+- `per_page`
 
-**Query Parameters:**
-- `search` - Search term
-- `category` - Filter by category
-- `level` - Filter by level
-- `page` - Page number
-- `per_page` - Items per page
+---
 
-**Response:**
-```json
-{
-    "courses": [...],
-    "total": 100,
-    "pages": 10,
-    "current_page": 1
-}
-```
+### Enrollment APIs
 
-#### GET /api/courses/:id
-Get course details.
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/enrollments` | Enroll in a course |
+| GET | `/api/enrollments` | Get enrolled courses |
 
-### Enrollment Endpoints
+---
 
-#### POST /api/enrollments
-Enroll in a course.
+### Progress APIs
 
-**Request Body:**
-```json
-{
-    "course_id": 1
-}
-```
-
-#### GET /api/enrollments
-Get user's enrollments.
-
-### Progress Endpoints
-
-#### GET /api/progress/:course_id
-Get course progress.
-
-#### POST /api/progress/:course_id/lesson/:lesson_id
-Mark lesson as completed.
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/progress/:course_id` | Get course progress |
+| POST | `/api/progress/:course_id/lesson/:lesson_id` | Mark lesson as completed |
 
 ## Screenshots
 
-### Landing Page
-![Landing Page](https://via.placeholder.com/800x400?text=Landing+Page)
+### Home Page
+
+![Home Page](screenshots/home.png)
 
 ### Student Dashboard
-![Student Dashboard](https://via.placeholder.com/800x400?text=Student+Dashboard)
 
-### Course Detail
-![Course Detail](https://via.placeholder.com/800x400?text=Course+Detail)
+![Student Dashboard](screenshots/student-dashboard.png)
+
+### Course Details
+
+![Course Details](screenshots/course-details.png)
+
+### Learning Page
+
+![Learning Page](screenshots/learning-page.png)
 
 ### Admin Dashboard
-![Admin Dashboard](https://via.placeholder.com/800x400?text=Admin+Dashboard)
+
+![Admin Dashboard](screenshots/admin-dashboard.png)
 
 ### Course Management
-![Course Management](https://via.placeholder.com/800x400?text=Course+Management)
+
+![Course Management](screenshots/course-management.png)
 
 ## Default Credentials
 
@@ -442,22 +382,23 @@ Mark lesson as completed.
 - Email: `admin@karmixtech.com`
 - Password: `Admin@123`
 
+> **Note:** These credentials are for demonstration and testing purposes only. Change them before deploying the application in a production environment.
+
 ## Future Enhancements
 
-- Video hosting integration
-- Discussion forums
-- Live sessions with WebRTC
-- Payment gateway (Stripe)
-- Email notifications
-- Two-factor authentication
-- Mobile app (React Native)
 - AI-powered course recommendations
-- Multi-language support
-- Badges and gamification
-- Social login (Google, GitHub)
-- Course ratings and reviews
 - Instructor dashboard
-- Certificate verification system
+- Course ratings and reviews
+- Live classes with WebRTC
+- Discussion forums
+- Payment gateway integration
+- Certificate generation and verification
+- Email notifications
+- Mobile application (React Native)
+- Social login (Google & GitHub)
+- Multi-language support
+- Two-factor authentication (2FA)
+- Badges and gamification
 
 ## Contributing
 
@@ -477,12 +418,17 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 - Flask Documentation
 - SQLAlchemy ORM
-- Font Awesome Icons
-- Google Fonts (Inter)
-- Pexels for stock images
+- MySQL Community
+- Font Awesome
+- Google Fonts
+- Pexels (Images)
 
 ---
 
-**Developed by KarmixTech Team**
+---
 
-*This project is suitable for portfolio presentation and internship submission.*
+## Author
+
+**Developed by Dablu Kumar** during the **KarmixTech Internship**.
+
+⭐ If you found this project useful, don't forget to give it a star on GitHub!
