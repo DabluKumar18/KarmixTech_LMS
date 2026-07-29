@@ -2,7 +2,8 @@
 
 ![KarmixTech LMS Banner](https://images.pexels.com/photos/5905485/pexels-photo-5905485.jpeg?auto=compress&cs=tinysrgb&w=1200)
 
-A comprehensive, industry-level **Learning Management System** built with Python Flask, featuring modern responsive design, secure authentication, REST APIs, and complete admin panel.
+A professional Full Stack Learning Management System (LMS) built with Python Flask and MySQL. The platform provides a complete learning environment where students can register, enroll in courses, watch video lectures, access PDF study materials, track learning progress, and receive certificates upon course completion. Administrators can efficiently manage courses, modules, lessons, enrollments, and students through a secure admin dashboard.
+
 
 ## Table of Contents
 
@@ -83,7 +84,7 @@ KarmixTech LMS is a professional-grade learning management platform designed for
 | Category | Technology |
 |----------|------------|
 | Backend | Python 3.11+, Flask |
-| Database | PostgreSQL (Supabase) |
+| Database | MySQL |
 | ORM | SQLAlchemy |
 | Authentication | Flask-Login |
 | Frontend | HTML5, CSS3, JavaScript |
@@ -170,15 +171,15 @@ KarmixTech_LMS/
 ### Prerequisites
 
 - Python 3.11 or higher
-- pip (Python package manager)
-- PostgreSQL database (or Supabase account)
+- MySQL Server 8.0+
 - Git
+- pip (Python Package Manager)
+- Visual Studio Code (Recommended)
 
 ### Step 1: Clone the Repository
 
 ```bash
-git clone https://github.com/yourusername/karmixtech-lms.git
-cd karmixtech-lms
+git clone https://github.com/DabluKumar18/KarmixTech_LMS.git cd KarmixTech_LMS
 ```
 
 ### Step 2: Create Virtual Environment
@@ -201,26 +202,34 @@ pip install -r requirements.txt
 
 ### Step 4: Configure Environment Variables
 
-Create a `.env` file in the project root:
+Create a .env file in the project root and add your MySQL configuration.
 
 ```env
 SECRET_KEY=your-secret-key-here
-SUPABASE_DB_URL=your-postgresql-connection-string
+
+MYSQL_HOST=localhost 
+MYSQL_USER=root 
+MYSQL_PASSWORD=your_mysql_password 
+MYSQL_DATABASE=lms_db 
+
 FLASK_ENV=development
 ```
 
-### Step 5: Initialize Database
+### Step 5: Create MySQL Database
+CREATE DATABASE lms_db;
+
+### Step 6: Initialize Database
 
 ```bash
-python app.py
+python init_db.py
 ```
 
 The application will automatically create tables and seed initial data.
 
-### Step 6: Run the Application
+### Step 7: Run the Application
 
 ```bash
-python app.py
+python run.py
 ```
 
 Open your browser and navigate to: `http://localhost:5000`
